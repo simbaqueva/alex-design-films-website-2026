@@ -123,23 +123,20 @@
 
     <!-- Script para carga de componentes (solo como fallback) -->
     <script>
-        // Limpiar caché al cerrar la página
+        // Limpiar caché al cerrar la página (pero mantener el carrito)
         window.addEventListener('beforeunload', function (e) {
-            // Limpiar sessionStorage
+            // Limpiar sessionStorage (excepto datos del carrito)
             sessionStorage.clear();
-
-            // Limpiar localStorage específico del carrito
-            localStorage.removeItem('alex_design_cart');
+            // NO eliminar el carrito - debe persistir entre sesiones
         });
 
-        // Limpiar caché al recargar la página
+        // Configuración de caché al recargar la página
         window.addEventListener('load', function () {
             // Forzar recarga sin caché si es una recarga
             if (performance.navigation.type === performance.navigation.TYPE_RELOAD) {
-                // Limpiar cache del carrito
-                localStorage.removeItem('alex_design_cart');
+                // NO limpiar cache del carrito - debe persistir
 
-                // Agregar timestamp a URLs para evitar caché
+                // Agregar timestamp a URLs para evitar caché de CSS
                 const links = document.querySelectorAll('link[rel="stylesheet"]');
                 links.forEach(link => {
                     const href = link.getAttribute('href');

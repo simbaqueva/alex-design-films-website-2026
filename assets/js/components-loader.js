@@ -32,7 +32,7 @@ class ComponentsLoader {
             const html = await loadPromise;
             this.components[componentName] = html;
             this.loadedComponents.add(componentName);
-            
+
             // Insertar en el DOM si se especifica container
             if (containerId) {
                 const container = document.getElementById(containerId);
@@ -65,10 +65,10 @@ class ComponentsLoader {
      * Cargar múltiples componentes en paralelo
      */
     async loadMultipleComponents(components) {
-        const promises = components.map(({ name, container }) => 
+        const promises = components.map(({ name, container }) =>
             this.loadComponent(name, container)
         );
-        
+
         try {
             await Promise.all(promises);
             console.log('✅ All components loaded successfully');
@@ -104,8 +104,9 @@ class ComponentsLoader {
             { name: 'ai-agents-section', container: 'ai-agents-container' },
             { name: 'tutorials-section', container: 'tutorials-container' },
             { name: 'contact-section', container: 'contact-container' },
-            { name: 'footer', container: 'footer-container' }
-            // El carrito se carga dinámicamente solo en la página de tienda
+            { name: 'footer', container: 'footer-container' },
+            { name: 'cart-component', container: 'cart-container' }, // Carrito disponible globalmente
+            { name: 'payment-page', container: null } // Página de pago
         ];
 
         try {
@@ -123,13 +124,16 @@ class ComponentsLoader {
     initializeComponents() {
         // Inicializar tooltips si existen
         this.initializeTooltips();
-        
+
         // Inicializar lazy loading de imágenes
         this.initializeLazyImages();
-        
+
         // Inicializar animaciones de entrada
         this.initializeEntryAnimations();
-        
+
+        // Inicializar cart manager si el componente del carrito está cargado
+        this.initializeCartManager();
+
         // Disparar evento de que los componentes están cargados
         document.dispatchEvent(new CustomEvent('components:loaded', {
             detail: {
@@ -137,8 +141,26 @@ class ComponentsLoader {
                 components: Array.from(this.loadedComponents)
             }
         }));
-        
+
         console.log('✅ Components initialized and event dispatched');
+    }
+
+    /**
+     * Inicializar cart manager
+     */
+    async initializeCartManager() {
+        if (this.isComponentLoaded('cart-component')) {
+            try {
+                // Importar dinámicamente el módulo del carrito
+                const { initializeCart } = await import('./modules/cart.js');
+                if (!window.cartManager) {
+                    window.cartManager = initializeCart();
+                    console.log('🛒 Cart manager initialized globally');
+                }
+            } catch (error) {
+                console.error('❌ Error initializing cart manager:', error);
+            }
+        }
     }
 
     /**
@@ -146,19 +168,19 @@ class ComponentsLoader {
      */
     initializeTooltips() {
         const tooltipElements = document.querySelectorAll('[data-tooltip]');
-        
+
         tooltipElements.forEach(element => {
             element.addEventListener('mouseenter', (e) => {
                 const tooltip = document.createElement('div');
                 tooltip.className = 'tooltip';
                 tooltip.textContent = e.target.dataset.tooltip;
-                
+
                 document.body.appendChild(tooltip);
-                
+
                 const rect = e.target.getBoundingClientRect();
                 tooltip.style.left = rect.left + rect.width / 2 - tooltip.offsetWidth / 2 + 'px';
                 tooltip.style.top = rect.top - tooltip.offsetHeight - 10 + 'px';
-                
+
                 setTimeout(() => tooltip.classList.add('tooltip--visible'), 10);
             });
 
@@ -177,7 +199,7 @@ class ComponentsLoader {
      */
     initializeLazyImages() {
         const images = document.querySelectorAll('img[data-src]');
-        
+
         const imageObserver = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
@@ -200,7 +222,7 @@ class ComponentsLoader {
      */
     initializeEntryAnimations() {
         const animatedElements = document.querySelectorAll('[data-animate]');
-        
+
         const animationObserver = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
@@ -227,15 +249,15 @@ class ComponentUtils {
      */
     createElement(tag, classes = [], content = '') {
         const element = document.createElement(tag);
-        
+
         if (classes.length > 0) {
             element.className = classes.join(' ');
         }
-        
+
         if (content) {
             element.innerHTML = content;
         }
-        
+
         return element;
     }
 
@@ -277,7 +299,7 @@ class ComponentUtils {
      */
     throttle(func, limit) {
         let inThrottle;
-        return function() {
+        return function () {
             const args = arguments;
             const context = this;
             if (!inThrottle) {
@@ -311,7 +333,7 @@ class ComponentUtils {
             document.body.appendChild(textArea);
             textArea.focus();
             textArea.select();
-            
+
             try {
                 document.execCommand('copy');
                 document.body.removeChild(textArea);
@@ -331,7 +353,7 @@ class ComponentUtils {
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
         const isTablet = /iPad|Android/i.test(ua) && !/Mobile/i.test(ua);
         const isDesktop = !isMobile && !isTablet;
-        
+
         return {
             isMobile,
             isTablet,

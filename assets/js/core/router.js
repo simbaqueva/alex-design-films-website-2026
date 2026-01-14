@@ -109,8 +109,8 @@ export class Router {
             // Actualizar navegación activa
             this.updateActiveNavigation(path);
 
-            // Inicializar componente específico
-            this.initializeComponent(route.component);
+            // Inicializar componente específico (esperar a que termine)
+            await this.initializeComponent(route.component);
 
             // Solo ocultar loading si se mostró
             if (isInitialLoad) {
@@ -127,6 +127,7 @@ export class Router {
 
         } catch (error) {
             console.error('Error handling route:', error);
+            this.hideLoading(); // Asegurar que se oculte el loading en caso de error
             this.handleRoute('error');
         }
     }
@@ -167,13 +168,24 @@ export class Router {
                 this.componentCache.set(componentName, html);
             }
 
-            this.container.innerHTML = html;
+            // Limpiar el contenedor antes de insertar nuevo contenido
+            this.container.innerHTML = '';
+
+            // Insertar el HTML de manera segura
+            try {
+                this.container.innerHTML = html;
+            } catch (domError) {
+                console.error('Error setting innerHTML for component:', componentName, domError);
+                // Intentar limpiar HTML potencialmente corrupto
+                const cleanHtml = html.replace(/<svg[^>]*>[\s\S]*?<\/svg>/g, '<div>SVG placeholder</div>');
+                this.container.innerHTML = cleanHtml;
+            }
 
             // Ejecutar scripts del componente
             this.executeComponentScripts(componentName);
 
         } catch (error) {
-            console.error('Error loading component:', error);
+            console.error('Error loading component:', componentName, error);
             throw error;
         }
     }
@@ -280,6 +292,9 @@ export class Router {
             case 'cart-page.html':
                 this.initCartPage();
                 break;
+            case 'payment-page.html':
+                this.initPaymentPage();
+                break;
         }
 
         // Reinicializar observadores
@@ -374,32 +389,22 @@ export class Router {
      * Inicializar cart page
      */
     async initCartPage() {
+        // Esperar un momento para que el DOM esté completamente renderizado
+        await new Promise(resolve => setTimeout(resolve, 50));
+
         this.setupCartPageListeners();
-        await this.initializeBoldPayment();
         this.updateCartPageUI();
     }
 
     /**
-     * Inicializar integración de Bold Payment
+     * Inicializar payment page
      */
-    async initializeBoldPayment() {
-        try {
-            // Importar el módulo de Bold Payment
-            const { initializeBoldPayment, getBoldPaymentIntegration } = await import('../modules/bold-payment.js');
+    async initPaymentPage() {
+        // Esperar un momento para que el DOM esté completamente renderizado
+        await new Promise(resolve => setTimeout(resolve, 50));
 
-            // Inicializar con tu API Key de Bold
-            // IMPORTANTE: Reemplaza 'YOUR_BOLD_API_KEY' con tu API Key real
-            const apiKey = 'YOUR_BOLD_API_KEY'; // TODO: Configurar API Key real
-
-            await initializeBoldPayment(apiKey);
-
-            // Guardar referencia global
-            window.boldPaymentIntegration = getBoldPaymentIntegration();
-
-            console.log('✅ Bold payment integration initialized');
-        } catch (error) {
-            console.error('❌ Error initializing Bold payment:', error);
-        }
+        this.setupPaymentPageListeners();
+        this.updatePaymentPageUI();
     }
 
     /**
@@ -425,6 +430,17 @@ export class Router {
     }
 
     /**
+     * Configurar event listeners para la página de pago
+     */
+    setupPaymentPageListeners() {
+        // Configurar formulario de pago
+        const paymentForm = document.getElementById('payment-form');
+        if (paymentForm) {
+            paymentForm.addEventListener('submit', this.handlePaymentForm.bind(this));
+        }
+    }
+
+    /**
      * Actualizar UI de la página del carrito
      */
     async updateCartPageUI() {
@@ -439,16 +455,17 @@ export class Router {
         const totalElement = document.getElementById('cart-page-total');
         const navBadge = document.getElementById('nav-cart-count');
 
+        // Verificar que los elementos existen
+        if (!itemsContainer || !emptyMessage || !summaryContainer) {
+            console.warn('Cart page elements not found');
+            return;
+        }
+
         if (cart.length === 0) {
             // Mostrar mensaje vacío
             itemsContainer.style.display = 'none';
             emptyMessage.style.display = 'flex';
             summaryContainer.style.display = 'none';
-
-            // Ocultar botón de Bold
-            if (window.boldPaymentIntegration) {
-                window.boldPaymentIntegration.hidePaymentButton();
-            }
 
             // Actualizar badge del navbar
             if (navBadge) {
@@ -461,34 +478,28 @@ export class Router {
             emptyMessage.style.display = 'none';
             summaryContainer.style.display = 'block';
 
-            // Generar HTML de los items con SVG corregidos
+            // Generar HTML de los items
             const itemsHTML = cart.map(item => `
                 <div class="cart-page-item">
                     <div class="cart-page-item__image">
-                        <svg viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/>
-                        </svg>
+                        <div class="cart-page-item__placeholder">
+                            📦
+                        </div>
                     </div>
                     <div class="cart-page-item__info">
-                        <h3 class="cart-page-item__name">${item.name}</h3>
+                        <h3 class="cart-page-item__name">${item.name.replace(/</g, '<').replace(/>/g, '>')}</h3>
                         <p class="cart-page-item__price">$${item.price.toFixed(2)}</p>
                     </div>
                     <div class="cart-page-item__quantity">
                         <button class="cart-page-item__quantity-btn" onclick="window.cartManager.updateQuantity('${item.id}', ${item.quantity - 1})">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M19 13H5v-2h14v2z"/>
-                            </svg>
+                            −
                         </button>
                         <span class="cart-page-item__quantity-value">${item.quantity}</span>
                         <button class="cart-page-item__quantity-btn" onclick="window.cartManager.updateQuantity('${item.id}', ${item.quantity + 1})">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
-                            </svg>
+                            +
                         </button>
                         <button class="cart-page-item__remove" onclick="window.cartManager.removeFromCart('${item.id}')">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-                            </svg>
+                            ×
                         </button>
                     </div>
                 </div>
@@ -511,19 +522,6 @@ export class Router {
                 navBadge.textContent = totalItems;
                 navBadge.style.display = totalItems > 0 ? 'flex' : 'none';
             }
-
-            // Actualizar botón de Bold Payment
-            if (window.boldPaymentIntegration) {
-                const cartData = {
-                    items: cart,
-                    subtotal: subtotal,
-                    tax: tax,
-                    total: total,
-                    itemCount: cart.reduce((sum, item) => sum + item.quantity, 0)
-                };
-
-                await window.boldPaymentIntegration.updatePaymentButton(cartData);
-            }
         }
     }
 
@@ -543,6 +541,163 @@ export class Router {
         e.preventDefault();
         // Lógica del newsletter existente
         console.log('Newsletter form submitted');
+    }
+
+    /**
+     * Actualizar UI de la página de pago
+     */
+    async updatePaymentPageUI() {
+        if (!window.cartManager) {
+            console.warn('Cart manager not available for payment page');
+            return;
+        }
+
+        const cart = window.cartManager.cart;
+        const summaryContent = document.getElementById('payment-summary-content');
+        const summaryTotals = document.getElementById('payment-summary-totals');
+        const paymentMethodsContent = document.getElementById('payment-methods-content');
+
+        // Verificar que hay productos en el carrito
+        if (!cart || cart.length === 0) {
+            // Redirigir al carrito si está vacío
+            this.navigate('carrito');
+            return;
+        }
+
+        // Generar resumen del pedido
+        const itemsHTML = cart.map(item => `
+            <div class="payment-summary-item">
+                <div class="payment-summary-item__info">
+                    <h4 class="payment-summary-item__name">${item.name}</h4>
+                    <span class="payment-summary-item__quantity">Cantidad: ${item.quantity}</span>
+                </div>
+                <span class="payment-summary-item__price">$${(item.price * item.quantity).toFixed(2)}</span>
+            </div>
+        `).join('');
+
+        if (summaryContent) {
+            summaryContent.innerHTML = itemsHTML;
+        }
+
+        // Generar totales
+        const subtotal = window.cartManager.calculateSubtotal();
+        const tax = window.cartManager.calculateTax();
+        const total = subtotal + tax;
+
+        const totalsHTML = `
+            <div class="payment-totals">
+                <div class="payment-totals__item">
+                    <span class="payment-totals__label">Subtotal:</span>
+                    <span class="payment-totals__value">$${subtotal.toFixed(2)}</span>
+                </div>
+                <div class="payment-totals__item">
+                    <span class="payment-totals__label">Impuestos (19%):</span>
+                    <span class="payment-totals__value">$${tax.toFixed(2)}</span>
+                </div>
+                <div class="payment-totals__item payment-totals__item--total">
+                    <span class="payment-totals__label">Total:</span>
+                    <span class="payment-totals__value">$${total.toFixed(2)}</span>
+                </div>
+            </div>
+        `;
+
+        if (summaryTotals) {
+            summaryTotals.innerHTML = totalsHTML;
+        }
+    }
+
+
+
+    /**
+     * Manejar envío del formulario de pago
+     */
+    async handlePaymentForm(e) {
+        e.preventDefault();
+
+        // TODO: Implementar integración de pagos
+        console.log('Payment form submitted - payment integration needed');
+        this.showPaymentError('La integración de pagos aún no está configurada');
+    }
+
+    /**
+     * Mostrar loading en el formulario de pago
+     */
+    showPaymentLoading(loading) {
+        const submitBtn = document.getElementById('payment-submit-btn');
+        const spinner = submitBtn?.querySelector('.payment-form__spinner');
+        const text = submitBtn?.querySelector('.payment-form__submit-text');
+
+        if (submitBtn) {
+            submitBtn.disabled = loading;
+        }
+
+        if (spinner) {
+            spinner.style.display = loading ? 'inline-block' : 'none';
+        }
+
+        if (text) {
+            text.textContent = loading ? 'Procesando...' : 'Procesar Pago';
+        }
+    }
+
+    /**
+     * Mostrar error en la página de pago
+     */
+    showPaymentError(message) {
+        const statusContainer = document.getElementById('payment-status');
+        const statusContent = document.getElementById('payment-status-content');
+
+        if (statusContainer && statusContent) {
+            statusContent.innerHTML = `
+                <div class="payment-error">
+                    <h3>Error en el pago</h3>
+                    <p>${message}</p>
+                    <button onclick="document.getElementById('payment-status').style.display='none'" class="payment-error__close">
+                        Cerrar
+                    </button>
+                </div>
+            `;
+            statusContainer.style.display = 'block';
+        } else {
+            alert('Error: ' + message);
+        }
+    }
+
+    /**
+     * Mostrar éxito en la página de pago
+     */
+    showPaymentSuccess(message, redirectTo = 'tienda') {
+        const statusContainer = document.getElementById('payment-status');
+        const statusContent = document.getElementById('payment-status-content');
+
+        if (statusContainer && statusContent) {
+            statusContent.innerHTML = `
+                <div class="payment-success">
+                    <h3>¡Pago exitoso!</h3>
+                    <p>${message}</p>
+                    <button onclick="window.router.navigate('${redirectTo}')" class="payment-success__continue">
+                        Continuar
+                    </button>
+                </div>
+            `;
+            statusContainer.style.display = 'block';
+
+            // Vaciar carrito después de 2 segundos
+            setTimeout(() => {
+                if (window.cartManager) {
+                    window.cartManager.clearCart();
+                }
+                setTimeout(() => {
+                    this.navigate(redirectTo);
+                }, 1000);
+            }, 2000);
+        } else {
+            alert('¡Pago exitoso! ' + message);
+            if (window.cartManager) {
+                window.cartManager.clearCart();
+            }
+            this.navigate(redirectTo);
+        }
     }
 
     /**
@@ -624,10 +779,20 @@ export class Router {
         try {
             const cartContainer = document.getElementById('cart-container');
             if (cartContainer && !cartContainer.innerHTML.trim()) {
-                const response = await fetch('./assets/components/cart-component.html');
-                if (!response.ok) throw new Error('Cart component not found');
-                const cartHTML = await response.text();
-                cartContainer.innerHTML = cartHTML;
+                // El carrito ya debería estar cargado globalmente por components-loader
+                // pero verificamos si existe
+                if (window.componentsLoader && window.componentsLoader.isComponentLoaded('cart-component')) {
+                    const cartHTML = window.componentsLoader.getComponent('cart-component');
+                    if (cartHTML) {
+                        cartContainer.innerHTML = cartHTML;
+                    }
+                } else {
+                    // Fallback: cargar directamente
+                    const response = await fetch('./assets/components/cart-component.html');
+                    if (!response.ok) throw new Error('Cart component not found');
+                    const cartHTML = await response.text();
+                    cartContainer.innerHTML = cartHTML;
+                }
 
                 // Inicializar el carrito si no existe
                 if (!window.cartManager) {
@@ -638,6 +803,9 @@ export class Router {
                     window.cartManager.setupEventListeners();
                     window.cartManager.updateCartUI();
                 }
+            } else if (window.cartManager) {
+                // Si el contenedor ya tiene contenido, solo actualizar la UI
+                window.cartManager.updateCartUI();
             }
         } catch (error) {
             console.error('Error loading cart component:', error);
@@ -741,6 +909,11 @@ router.register('contacto', 'contact-section.html', {
 router.register('carrito', 'cart-page.html', {
     title: 'Carrito - Álvaro Alexander',
     description: 'Gestiona tus productos seleccionados.'
+});
+
+router.register('pago', 'payment-page.html', {
+    title: 'Pago - Álvaro Alexander',
+    description: 'Procesar pago de tu pedido.'
 });
 
 // Rutas de error

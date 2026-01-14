@@ -10,10 +10,8 @@ Sitio web oficial de **Alex Design Films** - Producción audiovisual profesional
 - ✨ **Single Page Application (SPA)** moderna con URLs limpias
 - 🎨 **Diseño responsivo** optimizado para todos los dispositivos
 - 🛒 **Tienda integrada** con sistema de carrito de compras
-- 💳 **Pagos seguros** mediante integración con Bold Payments
 - 🤖 **Sección de Agentes IA** con servicios especializados
 - 📱 **Navegación fluida** sin recargas de página
-- 🔒 **Backend seguro** para procesamiento de pagos
 
 ## 🚀 Inicio Rápido
 
@@ -31,29 +29,7 @@ Sitio web oficial de **Alex Design Films** - Producción audiovisual profesional
    cd alex-design-films-website
    ```
 
-2. **Instala las dependencias del backend**
-   ```bash
-   cd backend
-   npm install
-   ```
-
-3. **Configura las variables de entorno**
-   ```bash
-   cp .env.example .env
-   ```
-   
-   Edita el archivo `.env` y agrega tus credenciales de Bold:
-   ```env
-   BOLD_API_KEY=tu_api_key_aqui
-   BOLD_SECRET_KEY=tu_secret_key_aqui
-   ```
-
-4. **Inicia el backend**
-   ```bash
-   npm start
-   ```
-
-5. **Inicia el frontend** (en otra terminal)
+3. **Inicia el servidor de desarrollo**
    
    **Opción A - Servidor Python (Recomendado):**
    ```bash
@@ -64,7 +40,7 @@ Sitio web oficial de **Alex Design Films** - Producción audiovisual profesional
    - Instala la extensión "Live Server"
    - Click derecho en `index.html` → "Open with Live Server"
 
-6. **Abre tu navegador**
+4. **Abre tu navegador**
    ```
    http://localhost:8000
    ```
@@ -79,11 +55,6 @@ alex-design-films-website/
 │   ├── js/                   # Scripts JavaScript
 │   ├── images/               # Imágenes
 │   └── fonts/                # Fuentes personalizadas
-├── backend/                   # Servidor Node.js
-│   ├── server.js             # Servidor Express
-│   ├── package.json          # Dependencias del backend
-│   ├── .env.example          # Plantilla de variables de entorno
-│   └── .gitignore            # Archivos ignorados del backend
 ├── index.html                # Página principal
 ├── firebase.json             # Configuración de Firebase
 ├── .htaccess                 # Configuración de Apache
@@ -100,21 +71,12 @@ alex-design-films-website/
 - **History API** - Navegación SPA con URLs limpias
 
 ### Backend
-- **Node.js** - Entorno de ejecución
-- **Express.js** - Framework web
-- **CORS** - Manejo de peticiones cross-origin
-- **Helmet** - Seguridad HTTP
-- **dotenv** - Gestión de variables de entorno
-- **express-rate-limit** - Limitación de peticiones
-
-### Pagos
-- **Bold Payments** - Pasarela de pagos colombiana
+- **Node.js** - Entorno de ejecución (opcional)
+- **Python** - Servidor de desarrollo
 
 ## 📖 Documentación Adicional
 
-- [📘 Guía de Instalación Completa](GUIA_INSTALACION.md)
 - [🚀 Guía de Deploy a Producción](GUIA_DEPLOY_PRODUCCION.md)
-- [💳 Integración de Bold Payments](BOLD_PAYMENT_INTEGRATION.md)
 - [🔗 Configuración de URLs Limpias](README_URLS_LIMPIAS.md)
 - [✅ Checklist de Implementación](CHECKLIST.md)
 
@@ -129,13 +91,11 @@ alex-design-films-website/
 
 ## 🔒 Seguridad
 
-⚠️ **IMPORTANTE**: Nunca subas el archivo `.env` a Git. Este archivo contiene credenciales sensibles.
+⚠️ **IMPORTANTE**: Implementa medidas de seguridad apropiadas antes de desplegar a producción.
 
-- Las credenciales de Bold se almacenan en variables de entorno
-- El backend valida todas las peticiones
-- Se implementa rate limiting para prevenir abusos
-- Headers de seguridad con Helmet
-- CORS configurado correctamente
+- Valida todas las entradas de usuario
+- Implementa HTTPS en producción
+- Configura CORS correctamente
 
 ## 🚀 Deploy a Producción
 
@@ -187,7 +147,6 @@ Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más det
 
 ## 🙏 Agradecimientos
 
-- Bold Payments por su excelente API
 - La comunidad de desarrolladores web
 - Todos los que han contribuido al proyecto
 

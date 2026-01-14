@@ -1,0 +1,156 @@
+<section id="payment" class="payment-page">
+    <div class="payment-page__container">
+        <div class="payment-page__header">
+            <h1 class="payment-page__title">Procesar Pago</h1>
+            <a href="#carrito" class="payment-page__back-link">
+                <svg class="payment-page__back-icon" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M20 11H7.83l5.59-5.59L12 4l-5.59 5.59L4 11h16v2z" />
+                </svg>
+                Volver al carrito
+            </a>
+        </div>
+
+        <div class="payment-page__content">
+            <!-- Order Summary -->
+            <div class="payment-page__summary" id="payment-summary">
+                <h2 class="payment-page__summary-title">Resumen del Pedido</h2>
+                <div class="payment-page__summary-content" id="payment-summary-content">
+                    <!-- Order items will be inserted here -->
+                </div>
+                <div class="payment-page__summary-totals" id="payment-summary-totals">
+                    <!-- Totals will be inserted here -->
+                </div>
+            </div>
+
+            <!-- Payment Methods -->
+            <div class="payment-page__methods" id="payment-methods">
+                <h2 class="payment-page__methods-title">Método de Pago</h2>
+                <div class="payment-page__methods-content" id="payment-methods-content">
+                    <!-- Payment methods will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Payment Form -->
+            <div class="payment-page__form" id="payment-form">
+                <h2 class="payment-page__form-title">Información de Pago</h2>
+                <form class="payment-form" id="payment-form">
+                    <div class="payment-form__group">
+                        <div class="payment-form__field">
+                            <div class="payment-form__input-wrapper">
+                                <select id="payment-method-select" name="payment_method" class="payment-form__select"
+                                    required>
+                                    <option value="">Seleccionar método de pago...</option>
+                                </select>
+                                <label for="payment-method-select" class="payment-form__label">Método de Pago</label>
+                                <svg class="payment-form__icon" viewBox="0 0 24 24" fill="currentColor">
+                                    <path
+                                        d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z" />
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="payment-form__help">
+                            Selecciona cómo deseas realizar el pago
+                        </div>
+                    </div>
+
+                    <div class="payment-form__group">
+                        <div class="payment-form__field">
+                            <div class="payment-form__input-wrapper">
+                                <input type="email" id="user-email" name="user_email" class="payment-form__input"
+                                    placeholder=" " value="cliente@alexdesignfilms.com" required>
+                                <label for="user-email" class="payment-form__label">Email del Vendedor</label>
+                                <svg class="payment-form__icon" viewBox="0 0 24 24" fill="currentColor">
+                                    <path
+                                        d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.89 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="payment-form__help">
+                            Email del responsable de la venta
+                        </div>
+                    </div>
+
+                    <div class="payment-form__group">
+                        <div class="payment-form__field">
+                            <div class="payment-form__input-wrapper">
+                                <input type="email" id="payer-email" name="payer_email" class="payment-form__input"
+                                    placeholder=" ">
+                                <label for="payer-email" class="payment-form__label">Email del Comprador</label>
+                                <svg class="payment-form__icon" viewBox="0 0 24 24" fill="currentColor">
+                                    <path
+                                        d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1H5C3.89 1 3 1.89 3 3V21C3 22.11 3.89 23 5 23H19C20.11 23 21 22.11 21 21V9M19 9H14V4H19V9M12 11C13.66 11 15 12.34 15 14C15 15.66 13.66 17 12 17C10.34 17 9 15.66 9 14C9 12.34 10.34 11 12 11Z" />
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="payment-form__help">
+                            Email del cliente que realiza la compra (opcional)
+                        </div>
+                    </div>
+
+                    <div class="payment-form__group">
+                        <div class="payment-form__field">
+                            <div class="payment-form__input-wrapper">
+                                <input type="tel" id="payer-phone" name="payer_phone" class="payment-form__input"
+                                    placeholder=" ">
+                                <label for="payer-phone" class="payment-form__label">Teléfono del Comprador</label>
+                                <svg class="payment-form__icon" viewBox="0 0 24 24" fill="currentColor">
+                                    <path
+                                        d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" />
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="payment-form__help">
+                            Número de teléfono del cliente (opcional)
+                        </div>
+                    </div>
+
+                    <div class="payment-form__group">
+                        <div class="payment-form__field">
+                            <div class="payment-form__input-wrapper">
+                                <textarea id="description" name="description" class="payment-form__textarea"
+                                    placeholder=" "></textarea>
+                                <label for="description" class="payment-form__label">Descripción</label>
+                                <svg class="payment-form__icon" viewBox="0 0 24 24" fill="currentColor">
+                                    <path
+                                        d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z" />
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="payment-form__help">
+                            Descripción adicional de la compra (opcional)
+                        </div>
+                    </div>
+
+                    <div class="payment-form__actions">
+                        <button type="button" class="payment-form__cancel-btn"
+                            onclick="window.router.navigate('carrito')">
+                            <svg viewBox="0 0 24 24" fill="currentColor" style="width: 1rem; height: 1rem;">
+                                <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
+                            </svg>
+                            Cancelar
+                        </button>
+                        <button type="submit" class="payment-form__submit-btn" id="payment-submit-btn">
+                            <svg viewBox="0 0 24 24" fill="currentColor" style="width: 1rem; height: 1rem;">
+                                <path
+                                    d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V7h10v2z" />
+                            </svg>
+                            <span class="payment-form__submit-text">Procesar Pago</span>
+                            <div class="payment-form__spinner" style="display: none;"></div>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Payment Status -->
+            <div class="payment-page__status" id="payment-status" style="display: none;">
+                <div class="payment-status" id="payment-status-content">
+                    <!-- Payment status will be shown here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    // Payment page logic will be loaded separately
+</script>

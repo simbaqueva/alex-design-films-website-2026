@@ -83,15 +83,15 @@ export class CartManager {
                 e.target.classList.contains('cart-item__quantity-btn--increase')) {
                 e.preventDefault();
                 e.stopPropagation();
-                
+
                 const cartItem = e.target.closest('.cart-item');
                 if (!cartItem) return;
-                
+
                 const productId = cartItem.dataset.itemId;
                 const action = e.target.classList.contains('cart-item__quantity-btn--increase') ? 'increase' : 'decrease';
                 const quantityValue = cartItem.querySelector('.cart-item__quantity-value');
                 const input = document.getElementById(`quantity-${productId}`);
-                
+
                 if (quantityValue && input) {
                     this.executeQuantityAction(productId, action, input, quantityValue);
                 }
@@ -104,15 +104,15 @@ export class CartManager {
                 e.target.classList.contains('cart-item__quantity-btn--increase')) {
                 e.preventDefault();
                 e.stopPropagation();
-                
+
                 const cartItem = e.target.closest('.cart-item');
                 if (!cartItem) return;
-                
+
                 const productId = cartItem.dataset.itemId;
                 const action = e.target.classList.contains('cart-item__quantity-btn--increase') ? 'increase' : 'decrease';
                 const quantityValue = cartItem.querySelector('.cart-item__quantity-value');
                 const input = document.getElementById(`quantity-${productId}`);
-                
+
                 if (quantityValue && input) {
                     this.executeQuantityAction(productId, action, input, quantityValue);
                 }
@@ -129,11 +129,11 @@ export class CartManager {
             )) {
                 e.preventDefault();
                 e.stopPropagation();
-                
+
                 const productId = targetButton.dataset.productId;
                 const action = targetButton.classList.contains('quantity-selector__increase') ? 'increase' : 'decrease';
                 const input = document.getElementById(`quantity-${productId}`);
-                
+
                 if (input) {
                     this.updateShopQuantity(productId, action, input);
                 }
@@ -150,11 +150,11 @@ export class CartManager {
             )) {
                 e.preventDefault();
                 e.stopPropagation();
-                
+
                 const productId = targetButton.dataset.productId;
                 const action = targetButton.classList.contains('quantity-selector__increase') ? 'increase' : 'decrease';
                 const input = document.getElementById(`quantity-${productId}`);
-                
+
                 if (input) {
                     this.updateShopQuantity(productId, action, input);
                 }
@@ -233,7 +233,7 @@ export class CartManager {
     handleQuantityInput(input) {
         const productId = input.dataset.productId;
         let value = parseInt(input.value) || 1;
-        
+
         // Validar y limitar valores
         if (isNaN(value) || value < 1) {
             value = 1;
@@ -312,7 +312,7 @@ export class CartManager {
             // Animar el input
             input.style.transform = 'scale(1.1)';
             input.style.backgroundColor = '#10b981';
-            
+
             setTimeout(() => {
                 input.style.transform = 'scale(1)';
                 input.style.backgroundColor = '';
@@ -346,15 +346,15 @@ export class CartManager {
     openCart() {
         const dropdown = document.getElementById('cart-dropdown');
         const overlay = document.getElementById('cart-overlay');
-        
+
         if (dropdown && overlay) {
             dropdown.classList.add('cart-widget__dropdown--active');
             overlay.classList.add('cart-widget__overlay--active');
             this.isOpen = true;
-            
+
             // Prevenir scroll del body
             document.body.style.overflow = 'hidden';
-            
+
             // Focus management para accesibilidad
             this.manageFocus('enter');
         }
@@ -366,15 +366,15 @@ export class CartManager {
     closeCart() {
         const dropdown = document.getElementById('cart-dropdown');
         const overlay = document.getElementById('cart-overlay');
-        
+
         if (dropdown && overlay) {
             dropdown.classList.remove('cart-widget__dropdown--active');
             overlay.classList.remove('cart-widget__overlay--active');
             this.isOpen = false;
-            
+
             // Restaurar scroll del body
             document.body.style.overflow = '';
-            
+
             // Focus management para accesibilidad
             this.manageFocus('exit');
         }
@@ -425,9 +425,9 @@ export class CartManager {
         if (this.isProcessing) {
             return;
         }
-        
+
         this.isProcessing = true;
-        
+
         const productName = button.dataset.product;
         const price = parseFloat(button.dataset.price);
         const productId = button.dataset.productId || this.generateProductId();
@@ -441,7 +441,7 @@ export class CartManager {
         }
 
         // Verificar si el producto ya está en el carrito
-        const existingItem = this.cart.find(item => 
+        const existingItem = this.cart.find(item =>
             item.id === productId && item.name === productName
         );
 
@@ -464,7 +464,7 @@ export class CartManager {
                 timestamp: Date.now(),
                 addedAt: new Date().toISOString()
             };
-            
+
             this.cart.push(newItem);
             this.showNotification(`${productName} (${quantity} ${quantity === 1 ? 'unidad' : 'unidades'}) agregado al carrito`, 'success');
         }
@@ -503,7 +503,7 @@ export class CartManager {
      */
     removeFromCart(productId) {
         const itemIndex = this.cart.findIndex(item => item.id === productId);
-        
+
         if (itemIndex !== -1) {
             const removedItem = this.cart[itemIndex];
             this.cart.splice(itemIndex, 1);
@@ -524,7 +524,7 @@ export class CartManager {
      */
     updateQuantity(productId, newQuantity) {
         const item = this.cart.find(item => item.id === productId);
-        
+
         if (item) {
             if (newQuantity <= 0) {
                 this.removeFromCart(productId);
@@ -628,7 +628,7 @@ export class CartManager {
             const totalItems = this.cart.reduce((sum, item) => sum + item.quantity, 0);
             badge.textContent = totalItems;
             badge.style.display = totalItems > 0 ? 'flex' : 'none';
-            
+
             // Añadir animación cuando cambia el número
             badge.classList.add('cart-widget__badge--pulse');
             setTimeout(() => {
@@ -643,14 +643,14 @@ export class CartManager {
     updateCartItems() {
         const container = document.getElementById('cart-items');
         const emptyMessage = document.getElementById('cart-empty');
-        
+
         if (!container) return;
 
         if (this.cart.length === 0) {
             container.innerHTML = `
                 <div class="cart-widget__empty" id="cart-empty">
                     <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor" style="opacity: 0.5; margin-bottom: 12px;">
-                        <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/>
+                        <path d="M7 18c-1.1 0-1.99 0.9-1.99 2S5.9 22 7 22s2-0.9 2-2-0.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-0.16 0.28-0.25 0.61-0.25 0.96 0 1.1 0.9 2 2 2h12v-2H7.42c-0.14 0-0.25-0.11-0.25-0.25l0.03-0.12 0.9-1.63h7.45c0.75 0 1.41-0.41 1.75-1.03l3.58-6.49c0.08-0.14 0.12-0.31 0.12-0.48 0-0.55-0.45-1-1-1H5.21l-0.94-2H1zm16 16c-1.1 0-1.99 0.9-1.99 2s0.89 2 1.99 2 2-0.9 2-2-0.9-2-2-2z"/>
                     </svg>
                     <p>Tu carrito está vacío</p>
                 </div>
@@ -761,7 +761,7 @@ export class CartManager {
     async processCheckout(orderData) {
         // Simular procesamiento
         await Helpers.wait(2000);
-        
+
         // Aquí iría la integración con pasarelas de pago reales
         this.showPaymentOptions(orderData);
     }
@@ -846,18 +846,18 @@ export class CartManager {
         try {
             // Simular procesamiento de pago
             await Helpers.wait(2000);
-            
+
             // Redirigir a ventana en blanco temporalmente
             this.closePaymentModal();
-            
+
             // Crear ventana de pago temporal
             const paymentWindow = window.open('', '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes');
-            
+
             // Esperar un poco y luego redirigir
             setTimeout(() => {
                 paymentWindow.location.href = 'https://example.com/payment'; // Cambiar esto por la pasarela real
             }, 1000);
-            
+
             this.clearCart();
             this.showNotification('Redirigiendo a pasarela de pagos...', 'info', {
                 title: 'Procesando Pago',
@@ -894,7 +894,7 @@ export class CartManager {
         button.style.transform = 'scale(0.95)';
         button.textContent = '✓ Agregado';
         button.disabled = true;
-        
+
         setTimeout(() => {
             button.style.transform = '';
             button.textContent = 'Agregar al Carrito';
@@ -914,12 +914,12 @@ export class CartManager {
      */
     loadCartFromStorage() {
         const savedCart = Helpers.loadFromStorage(this.storageKey, []);
-        
+
         // Filtrar items viejos y validar estructura
         this.cart = savedCart
             .filter(item => item && item.id && item.name && typeof item.price === 'number')
             .filter(item => !item.timestamp || (Date.now() - item.timestamp) < this.cartTimeout);
-        
+
         if (this.cart.length !== savedCart.length) {
             this.saveCartToStorage(); // Limpiar items viejos
         }
@@ -958,7 +958,7 @@ export class CartManager {
     getCartStats() {
         const itemCount = this.cart.reduce((sum, item) => sum + item.quantity, 0);
         const averagePrice = itemCount > 0 ? this.calculateTotal() / itemCount : 0;
-        const mostExpensive = this.cart.reduce((max, item) => 
+        const mostExpensive = this.cart.reduce((max, item) =>
             item.price > (max?.price || 0) ? item : max, null);
 
         return {
@@ -991,7 +991,7 @@ export class CartManager {
         try {
             const data = JSON.parse(jsonData);
             if (data.cart && Array.isArray(data.cart)) {
-                this.cart = data.cart.filter(item => 
+                this.cart = data.cart.filter(item =>
                     item && item.id && item.name && typeof item.price === 'number'
                 );
                 this.saveCartToStorage();

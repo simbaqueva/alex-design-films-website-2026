@@ -225,44 +225,94 @@
   height: 20px;
 }
 
-/* Bold Payment Button Container */
-.cart-page__bold-payment {
-  flex: 1;
-  display: none;
-  opacity: 0;
-  transition: opacity 0.3s ease-in-out;
-}
 
-.cart-page__bold-payment[style*="display: block"] {
-  display: block !important;
-}
-
-/* Estilos para el botón de Bold cuando se carga */
-.cart-page__bold-payment script[data-bold-button] {
+/* Payment Button Styles */
+.payment-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-3);
   width: 100%;
-}
-
-/* Override de estilos de Bold para integración */
-.cart-page__bold-payment iframe {
-  border-radius: var(--border-radius-lg) !important;
+  padding: var(--spacing-4);
+  background: var(--gradient-primary);
+  color: var(--color-secondary);
+  border: none;
+  border-radius: var(--border-radius-lg);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: var(--transition-normal);
+  text-decoration: none;
+  position: relative;
   overflow: hidden;
 }
 
-/* Animación de carga del botón Bold */
-@keyframes boldButtonFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.payment-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
 }
 
-.cart-page__bold-payment[style*="opacity: 1"] {
-  animation: boldButtonFadeIn 0.4s ease-out;
+.payment-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.payment-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.payment-button--test {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%);
+}
+
+.payment-button--test:hover:not(:disabled) {
+  box-shadow: 0 8px 25px rgba(251, 191, 36, 0.3);
+}
+
+.payment-button__icon {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.payment-button__text {
+  flex: 1;
+  text-align: center;
+}
+
+.payment-button__amount {
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-lg);
+}
+
+.payment-button__badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #ef4444;
+  color: white;
+  font-size: 10px;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 10px;
+  border: 2px solid var(--color-secondary);
+}
+
+/* Payment Button Spinner */
+.payment-button__spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: var(--color-secondary);
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 
