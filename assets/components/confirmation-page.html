@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmación de Pedido - Alex Design Films</title>
+    <meta name="description" content="Confirmación de tu pedido en Alex Design Films">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- CSS Principal -->
+    <link rel="stylesheet" href="./assets/css/main.css">
+    
+    <!-- Tailwind CSS Output -->
+    <link rel="stylesheet" href="./assets/css/tailwind-output.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="./assets/images/favicon.ico">
+    
+    <style>
+        body {
+            background: linear-gradient(135deg, #000000 0%, #101a24 50%, #000000 100%);
+            color: white;
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            padding: 2rem;
+        }
+        
+        .confirmation-container {
+            text-align: center;
+            max-width: 500px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 3rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 2rem;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: pulse 2s infinite;
+        }
+        
+        .success-icon::before {
+            content: "✓";
+            font-size: 3rem;
+            color: white;
+            font-weight: bold;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #ffffff 0%, #e0e0e0 100%);
+            color: black;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            margin: 1rem 0.5rem;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        }
+        
+        .order-info {
+            margin: 2rem 0;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .order-number {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #10b981;
+            margin-bottom: 0.5rem;
+        }
+        
+        .order-details {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.6;
+        }
+        
+        .divider {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+            margin: 1.5rem 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="confirmation-container">
+        <div class="success-icon"></div>
+        
+        <h1 style="font-size: 2rem; font-weight: 700; margin-bottom: 1rem; color: #10b981;">
+            ¡Pago Completado Exitosamente!
+        </h1>
+        
+        <p style="font-size: 1.1rem; margin-bottom: 2rem; color: rgba(255, 255, 255, 0.8);">
+            Tu pedido ha sido procesado y confirmado. Te hemos enviado un correo con los detalles de tu compra.
+        </p>
+        
+        <div class="order-info">
+            <div class="order-number" id="order-number">Pedido #PROD-2026-001</div>
+            <div class="order-details">
+                <p><strong>Fecha:</strong> <span id="order-date"></span></p>
+                <p><strong>Método de pago:</strong> <span id="payment-method">Pago Seguro</span></p>
+                <p><strong>Estado:</strong> <span style="color: #10b981;">Confirmado</span></p>
+            </div>
+        </div>
+        
+        <div class="divider"></div>
+        
+        <p style="font-size: 0.9rem; color: rgba(255, 255, 255, 0.6); margin-bottom: 2rem;">
+            Gracias por tu confianza en Alex Design Films. Tu pedido está siendo procesado y recibirás tus productos pronto.
+        </p>
+        
+        <a href="#tienda" class="btn">Seguir Comprando</a>
+        <a href="#inicio" class="btn">Volver al Inicio</a>
+    </div>
+    
+    <script>
+        // Generar número de pedido aleatorio
+        document.addEventListener('DOMContentLoaded', function() {
+            const orderNum = 'PROD-' + new Date().getFullYear() + '-' + 
+                            String(Math.floor(Math.random() * 900) + 100);
+            document.getElementById('order-number').textContent = 'Pedido #' + orderNum;
+            
+            // Fecha actual
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('es-CO', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            document.getElementById('order-date').textContent = dateStr;
+            
+            // Simular método de pago (en producción vendría del carrito)
+            const methods = ['Tarjeta de Crédito', 'PayPal', 'Mercado Pago', 'Stripe'];
+            const randomMethod = methods[Math.floor(Math.random() * methods.length)];
+            document.getElementById('payment-method').textContent = randomMethod;
+        });
+        
+        // Redirección automática después de 10 segundos
+        setTimeout(() => {
+            window.location.href = '#tienda';
+        }, 10000);
+    </script>
+</body>
+</html>

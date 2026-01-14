@@ -1,0 +1,516 @@
+/* ===================================
+   SHOP COMPONENT - ALEX DESIGN FILMS
+   ===================================
+   Tienda online con productos
+*/
+
+.shop {
+  padding: calc(var(--spacing-2xl) + 120px) var(--spacing-4) var(--spacing-2xl);
+  position: relative;
+  overflow: hidden;
+}
+
+.shop__container {
+  max-width: var(--container-xl);
+  margin: 0 auto;
+}
+
+.shop__header {
+  text-align: center;
+  margin-bottom: var(--spacing-2xl);
+  animation: fadeInUp 0.8s ease-out;
+}
+
+.shop__title {
+  font-size: var(--font-size-4xl);
+  font-weight: var(--font-weight-black);
+  margin-bottom: var(--spacing-4);
+  background: var(--gradient-accent);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: var(--text-glow);
+}
+
+.shop__subtitle {
+  font-size: var(--font-size-xl);
+  opacity: var(--opacity-80);
+  font-weight: var(--font-weight-medium);
+}
+
+.shop__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--spacing-6);
+  margin-bottom: var(--spacing-2xl);
+}
+
+.product-card {
+  background: var(--gradient-surface);
+  backdrop-filter: var(--blur-base);
+  border: var(--border-width-1) solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--border-radius-lg);
+  overflow: hidden;
+  transition: var(--transition-normal);
+  position: relative;
+  animation: fadeInUp 0.8s ease-out;
+}
+
+.product-card:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.product-card:nth-child(3) {
+  animation-delay: 0.2s;
+}
+
+.product-card:nth-child(4) {
+  animation-delay: 0.3s;
+}
+
+.product-card:hover {
+  transform: var(--card-hover-transform);
+  box-shadow: var(--shadow-dark-lg);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.product-card__image {
+  height: 200px;
+  background: rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.product-card__image::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, transparent 0%, rgba(255, 255, 255, 0.1) 100%);
+  opacity: 0;
+  transition: var(--transition-normal);
+}
+
+.product-card:hover .product-card__image::before {
+  opacity: 1;
+}
+
+.product-card__placeholder {
+  text-align: center;
+}
+
+.product-card__icon {
+  width: 60px;
+  height: 60px;
+  fill: var(--color-accent);
+  opacity: var(--opacity-60);
+  transition: var(--transition-normal);
+}
+
+.product-card:hover .product-card__icon {
+  opacity: var(--opacity-80);
+  transform: scale(1.1);
+}
+
+.product-card__content {
+  padding: var(--spacing-lg);
+}
+
+.product-card__title {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  margin-bottom: var(--spacing-2);
+  color: var(--color-secondary);
+  transition: var(--transition-normal);
+}
+
+.product-card:hover .product-card__title {
+  background: var(--gradient-accent);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.product-card__description {
+  opacity: var(--opacity-80);
+  margin-bottom: var(--spacing-4);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-relaxed);
+  transition: var(--transition-normal);
+}
+
+.product-card:hover .product-card__description {
+  opacity: var(--opacity-100);
+}
+
+.product-card__price {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-black);
+  color: var(--color-secondary);
+  margin-bottom: var(--spacing-4);
+  background: var(--gradient-accent);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: var(--text-glow);
+  transition: var(--transition-normal);
+}
+
+.product-card:hover .product-card__price {
+  transform: scale(1.05);
+}
+
+.product-card__controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+  margin-top: var(--spacing-4);
+}
+
+.quantity-selector {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-2);
+  margin-bottom: var(--spacing-3);
+  padding: var(--spacing-2);
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: var(--border-radius-md);
+  border: var(--border-width-1) solid rgba(255, 255, 255, 0.1);
+}
+
+.quantity-selector__btn {
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: var(--border-radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition-normal);
+  color: var(--color-secondary);
+}
+
+.quantity-selector__btn:hover {
+  background: var(--color-accent);
+  color: var(--color-primary);
+  transform: scale(1.1);
+}
+
+.quantity-selector__btn:active {
+  transform: scale(0.95);
+}
+
+.quantity-selector__input {
+  width: 50px;
+  height: 32px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.05);
+  border: var(--border-width-1) solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--border-radius-sm);
+  color: var(--color-secondary);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-sm);
+  transition: var(--transition-normal);
+}
+
+.quantity-selector__input:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.product-card__button {
+  width: 100%;
+  padding: var(--spacing-3) var(--spacing-4);
+  background: var(--gradient-accent);
+  color: var(--color-primary);
+  border: none;
+  border-radius: var(--border-radius-md);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: var(--transition-normal);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  position: relative;
+  overflow: hidden;
+}
+
+.product-card__button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: var(--transition-slow);
+}
+
+.product-card__button:hover::before {
+  left: 100%;
+}
+
+.product-card__button:hover {
+  transform: var(--button-hover-transform);
+  box-shadow: var(--shadow-dark-md);
+}
+
+.product-card__button:active {
+  transform: translateY(0);
+}
+
+.shop__actions {
+  text-align: center;
+  animation: fadeInUp 0.8s ease-out 1.2s both;
+}
+
+.shop__button {
+  display: inline-block;
+  padding: var(--spacing-4) var(--spacing-xl);
+  background: transparent;
+  color: var(--color-secondary);
+  border: var(--border-width-2) solid var(--color-secondary);
+  border-radius: var(--border-radius-lg);
+  font-weight: var(--font-weight-semibold);
+  transition: var(--transition-normal);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  position: relative;
+  overflow: hidden;
+}
+
+.shop__button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 100%;
+  background: var(--color-secondary);
+  transition: var(--transition-slow);
+}
+
+.shop__button:hover::before {
+  width: 100%;
+}
+
+.shop__button:hover {
+  color: var(--color-primary);
+  background: var(--color-secondary);
+  transform: var(--button-hover-transform);
+  box-shadow: var(--shadow-dark-md);
+}
+
+/* Efecto de badge para productos nuevos */
+.product-card.new::after {
+  content: 'NUEVO';
+  position: absolute;
+  top: var(--spacing-2);
+  right: var(--spacing-2);
+  background: var(--color-success);
+  color: var(--color-secondary);
+  padding: var(--spacing-1) var(--spacing-2);
+  border-radius: var(--border-radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  box-shadow: var(--shadow-dark-sm);
+  animation: pulse 2s infinite;
+}
+
+/* Responsive */
+
+/* Estados de carga */
+.product-card.loading .product-card__image {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.product-card.loading .product-card__icon {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Efecto de descuento */
+.product-card.has-discount .product-card__price::after {
+  content: attr(data-discount);
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background: var(--color-error);
+  color: var(--color-secondary);
+  padding: var(--spacing-1) var(--spacing-2);
+  border-radius: var(--border-radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  z-index: 1;
+}
+
+/* Animaciones */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+/* Responsive para móviles */
+@media (max-width: 768px) {
+  .shop__grid {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--spacing-4);
+  }
+
+  .product-card__controls {
+    gap: var(--spacing-2);
+  }
+
+  .quantity-selector {
+    padding: var(--spacing-1);
+  }
+
+  .quantity-selector__btn {
+    width: 28px;
+    height: 28px;
+  }
+
+  .quantity-selector__input {
+    width: 40px;
+    height: 28px;
+    font-size: var(--font-size-xs);
+  }
+
+  .product-card__button {
+    padding: var(--spacing-2) var(--spacing-3);
+    font-size: var(--font-size-sm);
+  }
+}
+
+/* ===================================
+   BOLD PAYMENT METHODS WIDGET
+   ===================================
+   Carrusel vertical de métodos de pago
+*/
+
+.shop__payment-methods {
+  margin-top: var(--spacing-xl);
+  margin-bottom: var(--spacing-2xl);
+  padding: var(--spacing-xl);
+  text-align: center;
+  position: relative;
+  animation: fadeInUp 0.8s ease-out 0.6s both;
+}
+
+.shop__payment-title {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  margin-bottom: var(--spacing-6);
+  background: var(--gradient-accent);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: var(--text-glow);
+  position: relative;
+  display: inline-block;
+}
+
+.shop__payment-title::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 3px;
+  background: var(--gradient-accent);
+  border-radius: var(--border-radius-full);
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+}
+
+.shop__payment-widget {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+  padding: var(--spacing-xl);
+}
+
+/* Override Bold carousel animation speed and styling */
+#bold-ui-kit-1 .bold-payment-methods--slider .bold-slide,
+#bold-ui-kit-1 .bold-slide,
+.bold-payment-methods--slider .bold-slide,
+.bold-slide {
+  animation-duration: 20s !important;
+  animation-timing-function: linear !important;
+  background-color: white !important;
+  padding: var(--spacing-4) !important;
+  border-radius: var(--border-radius-md) !important;
+}
+
+/* Ensure the animation applies to any Bold carousel elements */
+[class*="bold-slide"] {
+  animation-duration: 20s !important;
+  animation-timing-function: linear !important;
+  background-color: white !important;
+  padding: var(--spacing-4) !important;
+  border-radius: var(--border-radius-md) !important;
+}
+
+/* Increase the size of the entire Bold widget */
+#bold-ui-kit-1,
+.shop__payment-widget #bold-ui-kit-1 {
+  transform: scale(1.5) !important;
+  transform-origin: center !important;
+}
+
+/* Responsive para el widget de pagos */
+@media (max-width: 768px) {
+  .shop__payment-methods {
+    padding: var(--spacing-lg);
+    margin-top: var(--spacing-xl);
+  }
+
+  .shop__payment-title {
+    font-size: var(--font-size-xl);
+    margin-bottom: var(--spacing-4);
+  }
+
+  .shop__payment-widget {
+    min-height: 180px;
+    padding: var(--spacing-3);
+  }
+}

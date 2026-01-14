@@ -1,0 +1,662 @@
+/* ===================================
+   HERO COMPONENT - ALEX DESIGN FILMS
+   ===================================
+   Sección principal con presentación personal
+*/
+
+/* Imagen de perfil como fondo absoluto fuera del section */
+.hero__profile-background {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 50%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center left;
+  filter: grayscale(100%) contrast(1.2) brightness(1.1);
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Hero principal */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: calc(var(--spacing-2xl) + 80px) var(--spacing-4) var(--spacing-2xl);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Efecto de fondo animado */
+.hero::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.05) 0%, transparent 70%);
+  animation: heroGlow 4s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+@keyframes heroGlow {
+  0% { opacity: 0.3; }
+  100% { opacity: 0.7; }
+}
+
+/* Contenedor del hero */
+.hero__container {
+  max-width: var(--container-md);
+  width: 100%;
+  text-align: center;
+  position: relative;
+  z-index: 10;
+}
+
+.hero__content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2xl);
+  animation: fadeInUp 1s ease-out;
+}
+
+/* Contenedor izquierdo - texto y botones */
+.hero__left {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+/* Contenedor derecho - imagen de perfil (ahora vacío en desktop) */
+.hero__right {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Responsive para tablets y desktop */
+@media (min-width: 768px) {
+  /* Modificar el hero principal para que esté separado 10% del lado izquierdo */
+  .hero {
+    justify-content: flex-start; /* Alinear al inicio (izquierda) */
+    padding-left: 10%; /* Separado 10% del lado izquierdo */
+    width: auto; /* Ancho automático para ocupar el espacio restante */
+    max-width: none; /* Sin límite máximo de ancho */
+  }
+  
+  .hero__container {
+    max-width: 44%; /* Usar 44% del espacio disponible después del 10% de padding */
+    width: 100%;
+  }
+  
+  .hero__content {
+    flex-direction: column; /* Mantener en columna para mejor alineación */
+    align-items: flex-start; /* Alinear todo a la izquierda */
+    justify-content: flex-start;
+    gap: var(--spacing-2xl);
+  }
+  
+  .hero__brand {
+    justify-content: flex-start; /* Alinear logo a la izquierda */
+    margin-bottom: var(--spacing-xl);
+    position: relative;
+  }
+  
+  .hero__left {
+    flex: 1;
+    align-items: flex-start;
+    text-align: left;
+    max-width: 100%; /* Usar todo el ancho disponible */
+  }
+  
+  .hero__right {
+    flex: 0 0 auto;
+    justify-content: flex-end;
+    display: none; /* Ocultar contenedor derecho en desktop */
+  }
+  
+  /* Alineación del logo con el nombre - AJUSTADO PARA OCUPAR MISMO ANCHO QUE TEXTO */
+  .hero__logo {
+    width: 100%; /* Ocupar todo el ancho disponible como el texto */
+    max-width: none; /* Sin límite máximo para adaptarse al contenedor */
+    height: auto; /* Mantener proporción */
+    max-height: 140px; /* Altura máxima para no ser demasiado grande */
+    object-fit: contain;
+    margin-left: 0; /* Asegurar alineación izquierda */
+    position: relative;
+    z-index: 2;
+  }
+  
+  .hero__name {
+    text-align: left;
+    margin-left: 0; /* Asegurar alineación izquierda */
+    position: relative;
+    z-index: 1;
+  }
+  
+  .hero__description {
+    max-width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+  }
+  
+  .hero__text {
+    text-align: justify; /* Justificar textos para mejor alineación */
+    text-justify: inter-word; /* Justificación entre palabras */
+  }
+  
+  .hero__actions {
+    justify-content: flex-start;
+  }
+}
+
+/* Responsive para desktop grandes */
+@media (min-width: 1024px) {
+  .hero {
+    justify-content: flex-start; /* Mantener alineación izquierda */
+    padding-left: 10%; /* Mantener separado 10% del lado izquierdo */
+    width: auto; /* Ancho automático para ocupar el espacio restante */
+    max-width: none; /* Sin límite máximo de ancho */
+  }
+  
+  .hero__container {
+    max-width: 44%; /* Usar 44% del espacio disponible después del 10% de padding */
+  }
+  
+  .hero__content {
+    gap: var(--spacing-20);
+  }
+  
+  .hero__left {
+    max-width: 100%;
+  }
+  
+  .hero__logo {
+    width: 100%; /* Usar todo el ancho disponible como el texto */
+    max-width: none; /* Sin límite máximo para adaptarse al contenedor */
+    height: auto; /* Mantener proporción */
+    max-height: 160px; /* Altura máxima para pantallas grandes */
+    object-fit: contain;
+  }
+  
+  .hero__text {
+    text-align: justify; /* Mantener justificación */
+    text-justify: inter-word;
+  }
+}
+
+/* Responsive para extra large desktop */
+@media (min-width: 1440px) {
+  .hero {
+    justify-content: flex-start; /* Mantener alineación izquierda */
+    padding-left: 10%; /* Mantener separado 10% del lado izquierdo */
+    width: auto; /* Ancho automático para ocupar el espacio restante */
+    max-width: none; /* Sin límite máximo de ancho */
+  }
+  
+  .hero__container {
+    max-width: 44%; /* Usar 44% del espacio disponible después del 10% de padding */
+  }
+  
+  .hero__logo {
+    width: 100%; /* Usar todo el ancho disponible como el texto */
+    max-width: none; /* Sin límite máximo para adaptarse al contenedor */
+    height: auto; /* Mantener proporción */
+    max-height: 180px; /* Altura máxima para pantallas extra grandes */
+    object-fit: contain;
+  }
+  
+  .hero__text {
+    text-align: justify; /* Mantener justificación */
+    text-justify: inter-word;
+  }
+}
+
+/* Branding del hero */
+.hero__brand {
+  margin-bottom: var(--spacing-2xl);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Logo ajustado para mobile/tablet */
+@media (max-width: 767px) {
+  .hero__logo {
+    width: 80%; /* Ocupar 80% del ancho del contenedor principal */
+    max-width: none; /* Sin límite máximo para que pueda crecer */
+    height: auto; /* Mantener proporción sin distorsionar */
+    max-height: 120px; /* Altura máxima razonable para mobile */
+    object-fit: contain; /* Asegurar escala uniforme sin distorsión */
+    filter: var(--logo-glow);
+    margin: 0 auto; /* Centrar en mobile */
+  }
+}
+
+/* Logo para tablets */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .hero__logo {
+    width: 100%; /* Ocupar todo el ancho disponible */
+    max-width: 400px; /* Límite máximo para tablets */
+    height: auto; /* Mantener proporción */
+    max-height: 100px; /* Altura máxima para tablets */
+    object-fit: contain;
+    filter: var(--logo-glow);
+  }
+}
+
+.hero__logo-placeholder {
+  font-size: 1.5rem;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  animation: logoFloat 3s ease-in-out infinite;
+  background: var(--gradient-accent);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: var(--text-glow);
+  position: relative;
+  z-index: 2;
+}
+
+@keyframes logoFloat {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+/* Sección del perfil */
+.hero__profile {
+  margin-bottom: 0;
+}
+
+.hero__image-container {
+  width: 200px;
+  height: 200px;
+  margin: 0 auto var(--spacing-lg);
+  position: relative;
+  border-radius: var(--border-radius-full);
+  overflow: hidden;
+  box-shadow: var(--hero-glow);
+  border: var(--border-width-2) solid rgba(255, 255, 255, 0.2);
+  transition: var(--transition-slow);
+}
+
+.hero__image-container:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 60px rgba(255, 255, 255, 0.4);
+}
+
+.hero__image-placeholder {
+  width: 220px;
+  height: 220px;
+  margin: 0;
+  position: relative;
+  border-radius: var(--border-radius-full);
+  overflow: hidden;
+  box-shadow: var(--hero-glow);
+  border: var(--border-width-2) solid rgba(255, 255, 255, 0.2);
+  transition: var(--transition-slow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gradient-accent);
+}
+
+.hero__image-placeholder:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 60px rgba(255, 255, 255, 0.4);
+}
+
+.hero__avatar {
+  font-size: 3.5rem;
+  font-weight: var(--font-weight-black);
+  color: var(--color-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* Contenedor principal de la imagen de perfil */
+.hero__profile-container {
+  width: 320px;
+  height: 320px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--hero-glow);
+  border: var(--border-width-2) solid rgba(255, 255, 255, 0.2);
+  transition: var(--transition-normal);
+}
+
+/* Eliminar efecto de rebote - sin transform scale en hover */
+.hero__profile-container:hover {
+  box-shadow: 0 0 60px rgba(255, 255, 255, 0.4);
+}
+
+/* Imagen de perfil con filtro blanco y negro */
+.hero__profile-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(100%) contrast(1.2) brightness(1.1);
+  display: block;
+}
+
+/* Degradado superpuesto de abajo hacia arriba */
+.hero__profile-gradient {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 35%;
+  background: linear-gradient(
+    to top, 
+    rgba(0, 0, 0, 0.9) 0%, 
+    rgba(0, 0, 0, 0.6) 30%,
+    rgba(0, 0, 0, 0.3) 60%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Nombre */
+.hero__name {
+  font-size: var(--font-size-4xl);
+  font-weight: var(--font-weight-black);
+  margin-bottom: var(--spacing-lg);
+  background: var(--gradient-accent);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: var(--text-glow);
+  line-height: var(--line-height-tight);
+  animation: textGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes textGlow {
+  0% { text-shadow: var(--text-glow); }
+  100% { text-shadow: 0 0 30px rgba(255, 255, 255, 0.8); }
+}
+
+/* Descripción */
+.hero__description {
+  margin-bottom: var(--spacing-2xl);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.hero__text {
+  font-size: var(--font-size-lg);
+  line-height: var(--line-height-relaxed);
+  margin-bottom: var(--spacing-4);
+  opacity: var(--opacity-90);
+  animation: fadeIn 1s ease-out 0.5s both;
+  text-align: left;
+}
+
+.hero__text:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+/* Botones de acción */
+.hero__actions {
+  display: flex;
+  gap: var(--spacing-4);
+  justify-content: center;
+  flex-wrap: wrap;
+  animation: fadeInUp 1s ease-out 0.8s both;
+}
+
+.hero__button {
+  padding: var(--spacing-4) var(--spacing-xl);
+  border-radius: var(--border-radius-lg);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-base);
+  border: none;
+  cursor: pointer;
+  transition: var(--transition-normal);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  position: relative;
+  overflow: hidden;
+  min-width: 180px;
+}
+
+/* Botón primario */
+.hero__button--primary {
+  background: var(--gradient-accent);
+  color: var(--color-primary);
+  box-shadow: var(--shadow-dark-md);
+}
+
+.hero__button--primary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: var(--transition-slow);
+}
+
+.hero__button--primary:hover::before {
+  left: 100%;
+}
+
+.hero__button--primary:hover {
+  transform: var(--button-hover-transform);
+  box-shadow: var(--shadow-dark-lg);
+}
+
+.hero__button--primary:active {
+  transform: translateY(0);
+}
+
+/* Botón secundario */
+.hero__button--secondary {
+  background: transparent;
+  color: var(--color-secondary);
+  border: var(--border-width-2) solid var(--color-secondary);
+  backdrop-filter: var(--blur-sm);
+}
+
+.hero__button--secondary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 100%;
+  background: var(--color-secondary);
+  transition: var(--transition-normal);
+  z-index: -1;
+}
+
+.hero__button--secondary:hover::before {
+  width: 100%;
+}
+
+.hero__button--secondary:hover {
+  color: var(--color-primary);
+  border-color: var(--color-secondary);
+  transform: var(--button-hover-transform);
+}
+
+/* Efectos hover avanzados */
+.hero__button {
+  position: relative;
+}
+
+.hero__button::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: var(--border-radius-full);
+  transform: translate(-50%, -50%);
+  transition: var(--transition-slow);
+}
+
+.hero__button:hover::after {
+  width: 300px;
+  height: 300px;
+}
+
+/* Responsive */
+
+/* Estados de carga */
+.hero__profile-image.loading {
+  filter: grayscale(100%) contrast(1.2) blur(var(--blur-sm));
+  opacity: var(--opacity-70);
+}
+
+/* Efectos de partículas decorativas */
+.hero::after {
+  content: '';
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: var(--border-radius-full);
+  animation: floatParticle 6s ease-in-out infinite;
+}
+
+.hero::after:nth-child(2) {
+  left: 20%;
+  top: 30%;
+  animation-delay: 1s;
+}
+
+.hero::after:nth-child(3) {
+  right: 30%;
+  bottom: 40%;
+  animation-delay: 2s;
+}
+
+@keyframes floatParticle {
+  0%, 100% { 
+    transform: translateY(0px) scale(1);
+    opacity: var(--opacity-60);
+  }
+  50% { 
+    transform: translateY(-20px) scale(1.2);
+    opacity: var(--opacity-100);
+  }
+}
+
+/* Optimización para rendimiento */
+.hero {
+  will-change: transform;
+  contain: layout style paint;
+}
+
+.hero__profile-image {
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+/* ===================================
+   DISEÑO RESPONSIVE PARA IMAGEN DE PERFIL
+   =================================== */
+
+/* Mobile y Tablets - Diseño circular y centrado */
+@media (max-width: 1023px) {
+  .hero__profile-background {
+    display: none; /* Ocultar imagen de fondo en mobile/tablet */
+  }
+  
+  .hero__right {
+    display: flex; /* Mostrar contenedor derecho en mobile/tablet */
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .hero__profile-container {
+    width: 280px;
+    height: 280px;
+    border-radius: var(--border-radius-full);
+    margin: 0 auto;
+  }
+}
+
+/* Mobile first - hasta 480px */
+@media (max-width: 480px) {
+  .hero__profile-container {
+    width: 240px;
+    height: 240px;
+  }
+}
+
+/* Tablets small - 481px a 767px */
+@media (min-width: 481px) and (max-width: 767px) {
+  .hero__profile-container {
+    width: 280px;
+    height: 280px;
+  }
+}
+
+/* Tablets - 768px a 1023px */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .hero__profile-container {
+    width: 300px;
+    height: 300px;
+  }
+}
+
+/* Desktop y tablets grandes - Imagen como fondo absoluto y completamente adaptativa */
+@media (min-width: 1024px) {
+  .hero__profile-background {
+    display: block; /* Mostrar imagen de fondo en desktop */
+    clip-path: polygon(25% 0, 100% 0, 100% 100%, 0 100%); /* Forma triangular */
+    width: 50%; /* Siempre 50% del ancho del contenedor */
+    height: 100%; /* Siempre 100% de la altura del contenedor */
+  }
+}
+
+/* Desktop - 1024px a 1439px */
+@media (min-width: 1024px) and (max-width: 1439px) {
+  .hero__profile-background {
+    display: none; /* Ocultar imagen de fondo en este rango */
+  }
+}
+
+/* Large desktop - 1440px en adelante */
+@media (min-width: 1440px) {
+  .hero__profile-background {
+    width: 45%; /* Adaptativo al 45% para este rango */
+  }
+}
+
+/* Extra large screens - 1920px en adelante */
+@media (min-width: 1920px) {
+  .hero__profile-background {
+    width: 40%; /* Adaptativo al 40% para pantallas grandes */
+  }
+}
+
+/* Ajustes adicionales para pantallas ultra anchas */
+@media (min-width: 2560px) {
+  .hero__profile-background {
+    width: 35%; /* Adaptativo al 35% para pantallas ultra anchas */
+  }
+}
+
+/* ===================================
+   ELIMINAR ANIMACIÓN PARALLAX PARA PC
+   =================================== */
+
+/* Eliminar la animación parallaxImage que estaba en media-queries.css */
+@media (min-width: 1024px) {
+  .hero__profile-image {
+    animation: none;
+  }
+}

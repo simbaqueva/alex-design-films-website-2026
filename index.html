@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Álvaro Alexander - Desarrollador Profesional y Creador Digital</title>
+    <meta name="description"
+        content="Desarrollador profesional especializado en programación, branding, VFX, marketing digital y creación de agentes de IA. Soluciones integrales para tu negocio.">
+    <meta name="keywords"
+        content="programación, branding, VFX, marketing digital, agentes IA, diseño web, video producción">
+    <meta name="author" content="Álvaro Alexander Simbaqueva Sanabria">
+
+    <!-- Cache Control Meta Tags -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://alvaroalexander.com/">
+    <meta property="og:title" content="Álvaro Alexander - Desarrollador Profesional">
+    <meta property="og:description"
+        content="Desarrollador profesional especializado en soluciones digitales integrales">
+    <meta property="og:image" content="">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://alvaroalexander.com/">
+    <meta property="twitter:title" content="Álvaro Alexander - Desarrollador Profesional">
+    <meta property="twitter:description"
+        content="Desarrollador profesional especializado en soluciones digitales integrales">
+    <meta property="twitter:image" content="">
+
+    <!-- Tailwind CSS eliminado - se usa versión local compilada -->
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+
+    <!-- Font Awesome CDN en lugar de local para evitar 404 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        crossorigin="anonymous">
+
+    <!-- CSS Principal -->
+    <link rel="stylesheet" href="./assets/css/main.css">
+
+    <!-- Tailwind CSS Output -->
+    <link rel="stylesheet" href="./assets/css/tailwind-output.css">
+
+    <!-- Favicon optimizado para diferentes dispositivos y navegadores -->
+    <link rel="icon" type="image/x-icon" href="./assets/images/favicon.ico">
+    <link rel="icon" type="image/png" sizes="16x16" href="./assets/images/favicon_16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="./assets/images/favicon_32x32.png">
+    <link rel="icon" type="image/png" sizes="48x48" href="./assets/images/favicon_48x48.png">
+    <link rel="icon" type="image/png" sizes="64x64" href="./assets/images/favicon_64x64.png">
+    <link rel="apple-touch-icon" sizes="128x128" href="./assets/images/favicon_128x128.png">
+    <link rel="apple-touch-icon" sizes="192x192" href="./assets/images/favicon_192x192.png">
+    <link rel="apple-touch-icon" sizes="256x256" href="./assets/images/favicon_256x256.png">
+
+    <!-- Preload para mejor performance -->
+    <link rel="preload" href="./assets/js/main.js" as="script" crossorigin="anonymous">
+</head>
+
+<body class="bg-black text-white">
+
+    <!-- Skip links para accesibilidad -->
+    <a href="#main-content" class="sr-only focus-visible">Saltar al contenido principal</a>
+    <a href="#navigation" class="sr-only focus-visible">Saltar a navegación</a>
+
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loading-spinner"></div>
+        <p>Cargando experiencia...</p>
+    </div>
+
+    <!-- Header Component -->
+    <header id="header-container" role="banner"></header>
+
+    <!-- Main Content - SPA Container -->
+    <main id="main-content" role="main">
+        <!-- SPA Content Container -->
+        <div id="app-container" class="min-h-screen">
+            <!-- El contenido se cargará dinámicamente aquí -->
+        </div>
+    </main>
+
+    <!-- Footer Component -->
+    <footer id="footer-container" role="contentinfo"></footer>
+
+    <!-- Cart Component -->
+    <div id="cart-container" role="complementary" aria-label="Carrito de compras"></div>
+
+    <!-- Script dedicado del menú móvil -->
+    <script src="./assets/js/mobile-menu.js"></script>
+
+    <!-- Scripts Modulares -->
+    <script type="module" src="./assets/js/main.js"></script>
+
+    <!-- Fallback para navegadores antiguos -->
+    <script nomodule>
+        console.warn('Tu navegador no soporta módulos ES6. Por favor, actualiza tu navegador para una mejor experiencia.');
+
+        // Mostrar mensaje de navegador no compatible
+        document.getElementById('loading-screen').innerHTML = `
+            <div style="text-align: center; padding: 2rem;">
+                <h2 style="color: #ef4444; margin-bottom: 1rem;">Navegador No Compatible</h2>
+                <p style="margin-bottom: 1.5rem;">Tu navegador no es compatible con las tecnologías modernas que utilizamos.</p>
+                <p style="margin-bottom: 2rem;">Por favor, actualiza a una versión reciente de Chrome, Firefox, Safari, o Edge.</p>
+                <a href="https://browsehappy.com/" target="_blank" style="
+                    background: linear-gradient(135deg, #ffffff 0%, #e0e0e0 100%);
+                    color: black;
+                    padding: 12px 24px;
+                    border-radius: 8px;
+                    text-decoration: none;
+                    font-weight: 600;
+                ">Actualizar Navegador</a>
+            </div>
+        `;
+    </script>
+
+    <!-- Script para carga de componentes (solo como fallback) -->
+    <script>
+        // Limpiar caché al cerrar la página
+        window.addEventListener('beforeunload', function (e) {
+            // Limpiar sessionStorage
+            sessionStorage.clear();
+
+            // Limpiar localStorage específico del carrito
+            localStorage.removeItem('alex_design_cart');
+        });
+
+        // Limpiar caché al recargar la página
+        window.addEventListener('load', function () {
+            // Forzar recarga sin caché si es una recarga
+            if (performance.navigation.type === performance.navigation.TYPE_RELOAD) {
+                // Limpiar cache del carrito
+                localStorage.removeItem('alex_design_cart');
+
+                // Agregar timestamp a URLs para evitar caché
+                const links = document.querySelectorAll('link[rel="stylesheet"]');
+                links.forEach(link => {
+                    const href = link.getAttribute('href');
+                    if (href && !href.includes('?')) {
+                        link.setAttribute('href', href + '?v=' + Date.now());
+                    }
+                });
+            }
+        });
+
+        // Timeout para mostrar error si la carga toma demasiado tiempo
+        setTimeout(() => {
+            const loadingScreen = document.getElementById('loading-screen');
+            if (loadingScreen && loadingScreen.style.display !== 'none') {
+                console.warn('Loading timeout, falling back to component loading...');
+                loadComponentsFallback();
+            }
+        }, 5000); // 5 segundos
+
+        // Fallback para carga de componentes si los módulos fallan
+        window.addEventListener('error', function (e) {
+            if (e.filename && e.filename.includes('main.js')) {
+                console.log('Modular loading failed, falling back to component loading...');
+                loadComponentsFallback();
+            }
+        });
+
+        // Escuchar evento de que la app está lista
+        window.addEventListener('app:ready', function (e) {
+            console.log('✅ App ready event received:', e.detail);
+            hideLoadingScreen();
+        });
+
+        // Ocultar pantalla de carga
+        function hideLoadingScreen() {
+            const loadingScreen = document.getElementById('loading-screen');
+            if (loadingScreen) {
+                loadingScreen.style.opacity = '0';
+                loadingScreen.style.visibility = 'hidden';
+                setTimeout(() => {
+                    loadingScreen.style.display = 'none';
+                }, 300);
+            }
+        }
+
+        async function loadComponentsFallback() {
+            try {
+                // Cargar header
+                const headerResponse = await fetch('./assets/components/header.html');
+                const headerHTML = await headerResponse.text();
+                document.getElementById('header-container').innerHTML = headerHTML;
+
+                // Cargar footer
+                const footerResponse = await fetch('./assets/components/footer.html');
+                const footerHTML = await footerResponse.text();
+                document.getElementById('footer-container').innerHTML = footerHTML;
+
+                // Cargar carrito
+                const cartResponse = await fetch('./assets/components/cart-component.html');
+                const cartHTML = await cartResponse.text();
+                document.getElementById('cart-container').innerHTML = cartHTML;
+
+                // Para el contenido principal, cargar hero-section por defecto
+                const heroResponse = await fetch('./assets/components/hero-section.html');
+                const heroHTML = await heroResponse.text();
+                const appContainer = document.getElementById('app-container');
+                if (appContainer) {
+                    appContainer.innerHTML = heroHTML;
+                }
+
+                hideLoadingScreen();
+                console.log('✅ Components loaded via fallback');
+
+            } catch (error) {
+                console.error('❌ Error al cargar los componentes (fallback):', error);
+                showErrorScreen();
+            }
+        }
+
+        function showErrorScreen() {
+            document.body.innerHTML = `
+                <div style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    min-height: 100vh;
+                    background: linear-gradient(135deg, #000000 0%, #101a24 50%, #000000 100%);
+                    color: white;
+                    font-family: 'Inter', sans-serif;
+                    text-align: center;
+                    padding: 20px;
+                ">
+                    <div>
+                        <h1 style="font-size: 2rem; margin-bottom: 1rem; color: #ef4444;">
+                            Error de Carga
+                        </h1>
+                        <p style="font-size: 1.1rem; margin-bottom: 1.5rem; opacity: 0.8;">
+                            No se pudo cargar el sitio correctamente.
+                        </p>
+                        <p style="font-size: 0.9rem; margin-bottom: 2rem; opacity: 0.6;">
+                            Por favor, recarga la página o contacta al soporte.
+                        </p>
+                        <button onclick="location.reload()" style="
+                            background: linear-gradient(135deg, #ffffff 0%, #e0e0e0 100%);
+                            color: black;
+                            border: none;
+                            padding: 12px 24px;
+                            border-radius: 8px;
+                            font-weight: 600;
+                            cursor: pointer;
+                            font-size: 1rem;
+                            transition: transform 0.2s;
+                        " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                            Recargar Página
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+    </script>
+
+    <!-- Estilos para loading screen -->
+    <style>
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #000000 0%, #101a24 50%, #000000 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top: 3px solid #ffffff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        .focus-visible:focus {
+            outline: 2px solid #ffffff;
+            outline-offset: 2px;
+        }
+
+        /* Mejoras para accesibilidad */
+        @media (prefers-reduced-motion: reduce) {
+            .loading-spinner {
+                animation: none;
+                border-top-color: transparent;
+            }
+
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</body>
+
+</html>
