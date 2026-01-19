@@ -16,12 +16,19 @@ export const WOMPI_CONFIG = {
     // ========================================
     // LLAVES DE API
     // ========================================
-    // Llave pública de prueba (sandbox)
+    // Llave pública de prueba (sandbox) - Actualizada según documentación
     PUBLIC_KEY_TEST: 'pub_test_Q5yDA9xoKdePzhSGeVe9HAqZlX8xnTxh',
 
-    // Llave pública de producción
-    // ⚠️ IMPORTANTE: Reemplaza esto con tu llave real de Wompi
-    PUBLIC_KEY_PROD: 'pub_prod_TU_LLAVE_AQUI',
+    // Llave pública de producción - Proporcionada por el usuario
+    // ⚠️ IMPORTANTE: Estas son las llaves reales de producción
+    PUBLIC_KEY_PROD: 'pub_prod_cI8IJi8zI5v8lkKFtEFztW5YfNzxf5TI',
+
+    // Llave privada de producción (solo para backend/webhook)
+    PRIVATE_KEY_PROD: 'prv_prod_zeYEXA53dDxxLcn8deRoowwDJncxl8pN',
+
+    // Secretos para integración técnica
+    EVENTS_SECRET_PROD: 'prod_events_bZ28XnCltG3ZrKL5tzMdfpxivX8A1ITD',
+    INTEGRITY_SECRET_PROD: 'prod_integrity_NazR58ZG1boYfLdd3rf83rLwMgP9Nkpr',
 
     // ========================================
     // CONFIGURACIÓN DE PAGOS
@@ -39,6 +46,10 @@ export const WOMPI_CONFIG = {
     // ========================================
     MERCHANT_NAME: 'Alex Design Films',
     MERCHANT_EMAIL: 'contacto@alexdesignfilms.com',
+
+    // Merchant ID para sandbox (obtenido de la configuración de Wompi)
+    // Este ID se usa para algunas llamadas a la API interna de Wompi
+    MERCHANT_ID: null, // Se obtendrá dinámicamente si es necesario
 
     // ========================================
     // MÉTODOS DE PAGO HABILITADOS

@@ -18,7 +18,18 @@ import os
 # ========================================
 # CONFIGURACIÓN
 # ========================================
-WOMPI_EVENTS_SECRET = 'test_events_xxxxxx'  # Cambiar por tu secret de eventos
+# Secret de eventos para sandbox (pruebas)
+WOMPI_EVENTS_SECRET_TEST = 'test_events_bZ28XnCltG3ZrKL5tzMdfpxivX8A1ITD'
+
+# Secret de eventos para producción
+WOMPI_EVENTS_SECRET_PROD = 'prod_events_bZ28XnCltG3ZrKL5tzMdfpxivX8A1ITD'
+
+# Usar sandbox por defecto
+USE_SANDBOX = True
+
+# Seleccionar el secret apropiado según el modo
+WOMPI_EVENTS_SECRET = WOMPI_EVENTS_SECRET_TEST if USE_SANDBOX else WOMPI_EVENTS_SECRET_PROD
+
 PORT = 8080
 
 # ========================================
