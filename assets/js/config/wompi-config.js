@@ -37,9 +37,14 @@ export const WOMPI_CONFIG = {
     CURRENCY: 'COP',
 
     // URL de redirección después del pago
-    // En modo sandbox, Wompi acepta localhost
+    // En modo sandbox, Wompi acepta localhost y GitHub Pages
     // En producción, debe ser una URL pública HTTPS
-    REDIRECT_URL: window.location.origin + window.location.pathname + '#confirmacion',
+    REDIRECT_URL: (() => {
+        // Detectar si estamos en GitHub Pages
+        const isGitHubPages = window.location.hostname.includes('github.io');
+        const basePath = isGitHubPages ? '/alex-design-films-website-2026' : '';
+        return window.location.origin + basePath + '/#confirmacion';
+    })(),
 
     // ========================================
     // DATOS DEL COMERCIO
