@@ -3,7 +3,12 @@
 
 <head>
     <meta charset="UTF-8">
-    <base href="/alex-design-films-website-2026/">
+    <script>
+        // Configurar base href dinámicamente según el entorno
+        const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        const basePath = isLocalhost ? '/' : '/alex-design-films-website-2026/';
+        document.write('<base href="' + basePath + '">');
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Álvaro Alexander - Desarrollador Profesional y Creador Digital</title>
     <meta name="description"

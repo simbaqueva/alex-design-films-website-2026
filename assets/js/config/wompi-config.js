@@ -32,7 +32,7 @@ export const WOMPI_CONFIG = {
     // URL de redirección después del pago
     // En modo sandbox, Wompi acepta localhost
     // En producción, debe ser una URL pública HTTPS
-    REDIRECT_URL: window.location.origin + '/confirmacion',
+    REDIRECT_URL: window.location.origin + window.location.pathname + '#confirmacion',
 
     // ========================================
     // DATOS DEL COMERCIO

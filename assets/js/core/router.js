@@ -70,9 +70,9 @@ export class Router {
             path = 'inicio';
         }
 
-        // Actualizar URL sin recargar la página usando History API
-        const url = path === 'inicio' ? '/' : `/${path}`;
-        window.history.pushState({ path }, '', url);
+        // Actualizar URL usando hash para compatibilidad con GitHub Pages
+        const hash = path === 'inicio' ? '' : `#${path}`;
+        window.location.hash = hash;
 
         // Manejar la ruta
         this.handleRoute(path);
@@ -136,12 +136,17 @@ export class Router {
      * Manejar la ruta inicial
      */
     handleInitialRoute() {
-        // Leer desde pathname en lugar de hash
-        let path = window.location.pathname.substring(1); // Remover el / inicial
+        // Leer desde hash para compatibilidad con GitHub Pages
+        let path = window.location.hash.substring(1); // Remover el # inicial
 
-        // Si está vacío o es solo /, usar 'inicio'
+        // Si está vacío, usar 'inicio'
         if (!path || path === '/') {
             path = 'inicio';
+        }
+
+        // Remover / inicial si existe
+        if (path.startsWith('/')) {
+            path = path.substring(1);
         }
 
         if (this.routes.has(path)) {
@@ -207,21 +212,31 @@ export class Router {
      * Configurar event listeners
      */
     setupEventListeners() {
-        // Navigation events - manejar botones atrás/adelante
-        window.addEventListener('popstate', (e) => {
-            let path = window.location.pathname.substring(1);
+        // Navigation events - manejar cambios en el hash
+        window.addEventListener('hashchange', (e) => {
+            let path = window.location.hash.substring(1); // Remover #
             if (!path || path === '/') {
                 path = 'inicio';
+            }
+            // Remover / inicial si existe
+            if (path.startsWith('/')) {
+                path = path.substring(1);
             }
             this.handleRoute(path);
         });
 
-        // Click en enlaces internos (sin #, enlaces normales)
+        // Click en enlaces internos (con # o con /)
         document.addEventListener('click', (e) => {
-            const link = e.target.closest('a[href^="/"]');
+            const link = e.target.closest('a[href^="#"], a[href^="/"]');
             if (link && !link.hasAttribute('external')) {
                 e.preventDefault();
-                const path = link.getAttribute('href').substring(1); // Remover /
+                let path = link.getAttribute('href');
+                // Remover # o / inicial
+                if (path.startsWith('#')) {
+                    path = path.substring(1);
+                } else if (path.startsWith('/')) {
+                    path = path.substring(1);
+                }
                 this.navigate(path);
             }
         });
@@ -998,6 +1013,11 @@ router.register('carrito', 'cart-page.html', {
 router.register('pago', 'payment-page.html', {
     title: 'Pago - Álvaro Alexander',
     description: 'Procesar pago de tu pedido.'
+});
+
+router.register('confirmacion', 'confirmation-page.html', {
+    title: 'Confirmación - Álvaro Alexander',
+    description: 'Confirmación de tu pedido.'
 });
 
 // Rutas de error
