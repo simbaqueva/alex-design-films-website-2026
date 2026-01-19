@@ -476,23 +476,40 @@ export class Router {
         }
 
         try {
+            // Mostrar loading
+            this.showCheckoutLoading(true);
+
             // Inicializar Wompi si no está inicializado
             if (!window.wompiIntegration) {
+                console.log('🔄 Initializing Wompi integration...');
                 // Cargar configuración
                 const { default: WOMPI_CONFIG } = await import('../config/wompi-config.js');
                 const { initializeWompi } = await import('../modules/wompi-integration.js');
 
                 // Inicializar con la configuración
                 window.wompiIntegration = initializeWompi(WOMPI_CONFIG.getWompiConfig());
+
+                // Esperar un momento a que la inicialización se complete
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+
+            // Asegurarse de que Wompi esté completamente inicializado
+            if (!window.wompiIntegration.isInitialized) {
+                console.log('🔄 Waiting for Wompi to be fully initialized...');
+                const initialized = await window.wompiIntegration.initialize();
+                if (!initialized) {
+                    throw new Error('No se pudo inicializar Wompi');
+                }
             }
 
             // Obtener datos del carrito
             const summary = window.cartManager.getCartSummary();
+
             // Validar datos del carrito
             if (summary.total < 1) {
-                alert('El total del carrito debe ser al menos $1.00 para procesar el pago.');
-                return;
+                throw new Error('El total del carrito debe ser al menos $1.00 para procesar el pago.');
             }
+
             // Preparar datos de la orden
             const orderData = {
                 total: summary.total,
@@ -507,13 +524,50 @@ export class Router {
                 customerDocument: '1234567890'  // Documento de prueba
             };
 
+            console.log('🚀 Opening Wompi checkout with order data:', orderData);
+
             // Abrir checkout de Wompi
             const reference = await window.wompiIntegration.openCheckout(orderData);
-            console.log('Checkout opened with reference:', reference);
+            console.log('✅ Checkout opened with reference:', reference);
 
         } catch (error) {
-            console.error('Error opening checkout:', error);
-            alert('Error al abrir la pasarela de pago. Por favor intenta nuevamente.');
+            console.error('❌ Error opening checkout:', error);
+            alert(`Error al abrir la pasarela de pago: ${error.message}`);
+        } finally {
+            // Ocultar loading
+            this.showCheckoutLoading(false);
+        }
+    }
+
+    /**
+     * Mostrar/ocultar loading en el botón de checkout
+     */
+    showCheckoutLoading(show) {
+        const checkoutBtn = document.getElementById('cart-page-checkout');
+        if (!checkoutBtn) return;
+
+        if (show) {
+            checkoutBtn.disabled = true;
+            checkoutBtn.innerHTML = `
+                <div class="checkout-spinner" style="display: inline-block; width: 20px; height: 20px; border: 2px solid #f3f3f3; border-top: 2px solid #3498db; border-radius: 50%; animation: spin 1s linear infinite; margin-right: 10px;"></div>
+                Procesando...
+            `;
+
+            // Añadir animación CSS si no existe
+            if (!document.querySelector('#checkout-spinner-style')) {
+                const style = document.createElement('style');
+                style.id = 'checkout-spinner-style';
+                style.textContent = `
+                    @keyframes spin {
+                        0% { transform: rotate(0deg); }
+                        100% { transform: rotate(360deg); }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        } else {
+            checkoutBtn.disabled = false;
+            checkoutBtn.innerHTML = 'Procesar Pago';
         }
     }
 

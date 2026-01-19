@@ -53,9 +53,19 @@ export class WompiIntegration {
      */
     loadWompiScript() {
         return new Promise((resolve, reject) => {
-            // Verificar si ya existe
-            if (document.querySelector('script[src*="wompi"]')) {
+            // Verificar si ya existe y WidgetCheckout está disponible
+            if (window.WidgetCheckout && typeof window.WidgetCheckout === 'function') {
+                console.log('📦 Wompi widget.js already loaded');
                 resolve();
+                return;
+            }
+
+            // Verificar si el script ya está cargado pero WidgetCheckout no está disponible
+            if (document.querySelector('script[src*="wompi"]')) {
+                // Esperar un poco más a que WidgetCheckout esté disponible
+                this.waitForWidgetCheckout()
+                    .then(resolve)
+                    .catch(reject);
                 return;
             }
 
@@ -64,13 +74,45 @@ export class WompiIntegration {
             script.async = true;
             script.onload = () => {
                 console.log('📦 Wompi widget.js loaded');
-                resolve();
+                // Esperar a que WidgetCheckout esté realmente disponible
+                this.waitForWidgetCheckout()
+                    .then(resolve)
+                    .catch(reject);
             };
             script.onerror = (error) => {
                 console.error('❌ Failed to load Wompi widget.js:', error);
                 reject(error);
             };
             document.head.appendChild(script);
+        });
+    }
+
+    /**
+     * Esperar a que WidgetCheckout esté disponible
+     */
+    waitForWidgetCheckout(maxAttempts = 50, delay = 100) {
+        return new Promise((resolve, reject) => {
+            let attempts = 0;
+
+            const checkWidget = () => {
+                attempts++;
+
+                if (window.WidgetCheckout && typeof window.WidgetCheckout === 'function') {
+                    console.log('✅ WidgetCheckout is available');
+                    resolve();
+                    return;
+                }
+
+                if (attempts >= maxAttempts) {
+                    console.error('❌ WidgetCheckout not available after', maxAttempts, 'attempts');
+                    reject(new Error('WidgetCheckout is not available. Make sure widget.js is loaded.'));
+                    return;
+                }
+
+                setTimeout(checkWidget, delay);
+            };
+
+            checkWidget();
         });
     }
 
@@ -88,8 +130,11 @@ export class WompiIntegration {
      */
     async openCheckout(orderData) {
         try {
+            console.log('🔄 Starting Wompi checkout process...');
+
             // Inicializar si no está listo
             if (!this.isInitialized) {
+                console.log('🔄 Initializing Wompi...');
                 const initialized = await this.initialize();
                 if (!initialized) {
                     throw new Error('Failed to initialize Wompi');
@@ -110,48 +155,74 @@ export class WompiIntegration {
             // Preparar datos del cliente
             const customerData = this.prepareCustomerData(orderData);
 
-            // Configuración del checkout
+            // Configuración del checkout - versión simplificada para evitar errores
             const checkoutConfig = {
                 currency: this.currency,
                 amountInCents: amountInCents,
                 reference: reference,
                 publicKey: this.publicKey,
-                redirectUrl: this.redirectUrl,
-                customerData: customerData,
-                // Personalización del widget
-                customerEmail: customerData.email || '',
-                customerFullName: customerData.fullName || '',
-                customerPhoneNumber: customerData.phoneNumber || ''
+                redirectUrl: this.redirectUrl
             };
 
             console.log('🚀 Opening Wompi Widget Checkout:', {
                 reference,
                 amount: amountInCents / 100,
                 currency: this.currency,
-                config: checkoutConfig
+                publicKey: this.publicKey,
+                redirectUrl: this.redirectUrl
             });
 
-            // Verificar que WidgetCheckout esté disponible
+            // Verificación final de WidgetCheckout
             if (typeof window.WidgetCheckout !== 'function') {
+                console.error('❌ WidgetCheckout not available:', typeof window.WidgetCheckout);
                 throw new Error('WidgetCheckout is not available. Make sure widget.js is loaded.');
             }
+
+            // Capturar errores de la consola relacionados con Wompi
+            const originalError = console.error;
+            const wompiErrors = [];
+
+            console.error = function (...args) {
+                const message = args.join(' ');
+                if (message.includes('wompi') || message.includes('Wompi') || message.includes('checkout')) {
+                    wompiErrors.push(message);
+                }
+                originalError.apply(console, args);
+            };
 
             // Crear y abrir el checkout
             this.currentCheckout = new window.WidgetCheckout(checkoutConfig);
 
+            // Restaurar console.error
+            console.error = originalError;
+
             // Escuchar eventos del checkout
             this.setupCheckoutListeners(reference, orderData);
 
-            // Abrir el widget
+            // Abrir el widget con manejo de errores
             this.currentCheckout.open((result) => {
+                if (wompiErrors.length > 0) {
+                    console.warn('⚠️ Wompi API warnings (non-critical):', wompiErrors);
+                }
                 this.handleCheckoutResult(result, reference, orderData);
             });
 
+            console.log('✅ Wompi checkout opened successfully');
             return reference;
 
         } catch (error) {
             console.error('❌ Error opening Wompi checkout:', error);
-            this.showError('Error al abrir la pasarela de pago. Por favor intenta nuevamente.');
+
+            // Proporcionar mensaje más específico según el error
+            let errorMessage = 'Error al abrir la pasarela de pago. Por favor intenta nuevamente.';
+
+            if (error.message.includes('WidgetCheckout')) {
+                errorMessage = 'El widget de pago no está disponible. Recarga la página e intenta nuevamente.';
+            } else if (error.message.includes('initialize')) {
+                errorMessage = 'No se pudo inicializar el sistema de pagos. Recarga la página.';
+            }
+
+            this.showError(errorMessage);
             throw error;
         }
     }
