@@ -177,8 +177,21 @@ export class Router {
             } catch (domError) {
                 console.error('Error setting innerHTML for component:', componentName, domError);
                 // Intentar limpiar HTML potencialmente corrupto
-                const cleanHtml = html.replace(/<svg[^>]*>[\s\S]*?<\/svg>/g, '<div>SVG placeholder</div>');
-                this.container.innerHTML = cleanHtml;
+                // En lugar de reemplazar SVGs, intentar con un enfoque más seguro
+                try {
+                    // Usar DOMParser para parsear HTML de forma más segura
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    // Limpiar scripts potencialmente problemáticos
+                    const scripts = doc.querySelectorAll('script');
+                    scripts.forEach(script => script.remove());
+                    this.container.innerHTML = doc.body.innerHTML;
+                } catch (parseError) {
+                    console.error('Error parsing HTML with DOMParser:', parseError);
+                    // Fallback: insertar HTML sin scripts
+                    const cleanHtml = html.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '');
+                    this.container.innerHTML = cleanHtml;
+                }
             }
 
             // Ejecutar scripts del componente
@@ -422,11 +435,71 @@ export class Router {
             });
         }
 
+        // Botón de checkout - Abrir Wompi
+        const checkoutBtn = document.getElementById('cart-page-checkout');
+        if (checkoutBtn) {
+            checkoutBtn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                await this.handleCheckoutClick();
+            });
+        }
+
         // Escuchar cambios en el carrito
         document.addEventListener('cart:item-added', () => this.updateCartPageUI());
         document.addEventListener('cart:item-removed', () => this.updateCartPageUI());
         document.addEventListener('cart:quantity-updated', () => this.updateCartPageUI());
         document.addEventListener('cart:cart-cleared', () => this.updateCartPageUI());
+    }
+
+    /**
+     * Manejar clic en botón de checkout
+     */
+    async handleCheckoutClick() {
+        if (!window.cartManager || window.cartManager.cart.length === 0) {
+            alert('El carrito está vacío');
+            return;
+        }
+
+        try {
+            // Inicializar Wompi si no está inicializado
+            if (!window.wompiIntegration) {
+                // Cargar configuración
+                const { default: WOMPI_CONFIG } = await import('../config/wompi-config.js');
+                const { initializeWompi } = await import('../modules/wompi-integration.js');
+
+                // Inicializar con la configuración
+                window.wompiIntegration = initializeWompi(WOMPI_CONFIG.getWompiConfig());
+            }
+
+            // Obtener datos del carrito
+            const summary = window.cartManager.getCartSummary();
+            // Validar datos del carrito
+            if (summary.total < 1) {
+                alert('El total del carrito debe ser al menos $1.00 para procesar el pago.');
+                return;
+            }
+            // Preparar datos de la orden
+            const orderData = {
+                total: summary.total,
+                subtotal: summary.subtotal,
+                tax: summary.tax,
+                items: window.cartManager.cart,
+                itemCount: summary.itemCount,
+                // Datos del cliente (opcionales - se pueden pedir en un formulario)
+                customerEmail: 'cliente@example.com',
+                customerName: 'Cliente Alex Design Films',
+                customerPhone: '3001234567',
+                customerDocument: '1234567890'  // Documento de prueba
+            };
+
+            // Abrir checkout de Wompi
+            const reference = await window.wompiIntegration.openCheckout(orderData);
+            console.log('Checkout opened with reference:', reference);
+
+        } catch (error) {
+            console.error('Error opening checkout:', error);
+            alert('Error al abrir la pasarela de pago. Por favor intenta nuevamente.');
+        }
     }
 
     /**
@@ -454,6 +527,7 @@ export class Router {
         const taxElement = document.getElementById('cart-page-tax');
         const totalElement = document.getElementById('cart-page-total');
         const navBadge = document.getElementById('nav-cart-count');
+        const checkoutBtn = document.getElementById('cart-page-checkout');
 
         // Verificar que los elementos existen
         if (!itemsContainer || !emptyMessage || !summaryContainer) {
@@ -467,6 +541,11 @@ export class Router {
             emptyMessage.style.display = 'flex';
             summaryContainer.style.display = 'none';
 
+            // Ocultar botón de pago cuando no hay productos
+            if (checkoutBtn) {
+                checkoutBtn.style.display = 'none';
+            }
+
             // Actualizar badge del navbar
             if (navBadge) {
                 navBadge.textContent = '0';
@@ -478,6 +557,11 @@ export class Router {
             emptyMessage.style.display = 'none';
             summaryContainer.style.display = 'block';
 
+            // Mostrar botón de pago cuando hay productos
+            if (checkoutBtn) {
+                checkoutBtn.style.display = 'flex';
+            }
+
             // Generar HTML de los items
             const itemsHTML = cart.map(item => `
                 <div class="cart-page-item">
@@ -487,7 +571,7 @@ export class Router {
                         </div>
                     </div>
                     <div class="cart-page-item__info">
-                        <h3 class="cart-page-item__name">${item.name.replace(/</g, '<').replace(/>/g, '>')}</h3>
+                        <h3 class="cart-page-item__name">${item.name.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</h3>
                         <p class="cart-page-item__price">$${item.price.toFixed(2)}</p>
                     </div>
                     <div class="cart-page-item__quantity">

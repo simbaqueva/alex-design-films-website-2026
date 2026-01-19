@@ -225,6 +225,12 @@
   height: 20px;
 }
 
+/* Ocultar botón de checkout por defecto - se muestra via JavaScript cuando hay productos */
+.cart-page__checkout-btn {
+  display: none;
+}
+
+
 
 /* Payment Button Styles */
 .payment-button {

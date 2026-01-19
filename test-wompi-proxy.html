@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Wompi Proxy</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .test-section {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+            transition: transform 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .result {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .success {
+            color: #4ade80;
+        }
+
+        .error {
+            color: #f87171;
+        }
+
+        .info {
+            color: #60a5fa;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🧪 Test Wompi Proxy Local</h1>
+
+        <div class="test-section">
+            <h2>1. Test de Conectividad</h2>
+            <p>Verifica que el proxy esté funcionando correctamente</p>
+            <button onclick="testConnectivity()">Probar Conexión</button>
+            <div id="connectivity-result" class="result" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>2. Obtener Métodos de Pago</h2>
+            <p>Consulta los métodos de pago disponibles en Wompi</p>
+            <button onclick="getPaymentMethods()">Obtener Métodos</button>
+            <div id="methods-result" class="result" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>3. Obtener Bancos PSE</h2>
+            <p>Lista de bancos disponibles para PSE</p>
+            <button onclick="getPSEBanks()">Obtener Bancos</button>
+            <div id="banks-result" class="result" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>4. Test del Widget</h2>
+            <p>Abre el widget de Wompi para hacer un pago de prueba</p>
+            <button onclick="testWidget()">Abrir Widget</button>
+            <div id="widget-result" class="result" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Configuración
+        const PROXY_BASE_URL = '/api/wompi/';
+        const PUBLIC_KEY = 'pub_test_Q5yDA9xoKdePzhSGeVe9HAqZlX8xnTxh';
+
+        // Función para hacer peticiones al proxy
+        async function proxyRequest(endpoint, options = {}) {
+            const url = PROXY_BASE_URL + endpoint;
+
+            const requestOptions = {
+                method: options.method || 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...options.headers
+                }
+            };
+
+            if (options.body) {
+                requestOptions.body = JSON.stringify(options.body);
+            }
+
+            const response = await fetch(url, requestOptions);
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error?.reason || data.message || 'Request failed');
+            }
+
+            return data;
+        }
+
+        // Test 1: Conectividad
+        window.testConnectivity = async function () {
+            const resultDiv = document.getElementById('connectivity-result');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '<div class="loading"></div> Probando conexión...';
+
+            try {
+                const response = await fetch('/api/wompi/merchants/' + PUBLIC_KEY, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    resultDiv.innerHTML = `
+                        <div class="success">✅ Conexión exitosa!</div>
+                        <div class="info">El proxy está funcionando correctamente</div>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                } else {
+                    throw new Error('Response not OK');
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">❌ Error de conexión</div>
+                    <div>${error.message}</div>
+                    <div class="info">Asegúrate de que server.py esté corriendo</div>
+                `;
+            }
+        };
+
+        // Test 2: Métodos de pago
+        window.getPaymentMethods = async function () {
+            const resultDiv = document.getElementById('methods-result');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '<div class="loading"></div> Obteniendo métodos de pago...';
+
+            try {
+                const response = await fetch('/api/wompi/payment_methods?public_key=' + PUBLIC_KEY, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    resultDiv.innerHTML = `
+                        <div class="success">✅ Métodos de pago obtenidos</div>
+                        <div class="info">Total: ${data.data?.length || 0} métodos</div>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                } else {
+                    throw new Error(data.error?.reason || 'Failed to get payment methods');
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">❌ Error</div>
+                    <div>${error.message}</div>
+                `;
+            }
+        };
+
+        // Test 3: Bancos PSE
+        window.getPSEBanks = async function () {
+            const resultDiv = document.getElementById('banks-result');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '<div class="loading"></div> Obteniendo bancos PSE...';
+
+            try {
+                const response = await fetch('/api/wompi/pse/financial_institutions', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + PUBLIC_KEY
+                    }
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    const banks = data.data || [];
+                    resultDiv.innerHTML = `
+                        <div class="success">✅ Bancos PSE obtenidos</div>
+                        <div class="info">Total: ${banks.length} bancos</div>
+                        <div style="margin-top: 10px;">
+                            ${banks.slice(0, 10).map(bank =>
+                        `<div>• ${bank.financial_institution_name}</div>`
+                    ).join('')}
+                            ${banks.length > 10 ? `<div class="info">... y ${banks.length - 10} más</div>` : ''}
+                        </div>
+                        <details style="margin-top: 10px;">
+                            <summary style="cursor: pointer;">Ver JSON completo</summary>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </details>
+                    `;
+                } else {
+                    throw new Error(data.error?.reason || 'Failed to get PSE banks');
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">❌ Error</div>
+                    <div>${error.message}</div>
+                `;
+            }
+        };
+
+        // Test 4: Widget
+        window.testWidget = async function () {
+            const resultDiv = document.getElementById('widget-result');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '<div class="loading"></div> Cargando widget de Wompi...';
+
+            try {
+                // Cargar el script de Wompi si no está cargado
+                if (!window.WidgetCheckout) {
+                    await new Promise((resolve, reject) => {
+                        const script = document.createElement('script');
+                        script.src = 'https://checkout.wompi.co/widget.js';
+                        script.async = true;
+                        script.onload = resolve;
+                        script.onerror = reject;
+                        document.head.appendChild(script);
+                    });
+                }
+
+                // Configuración del checkout
+                const checkoutConfig = {
+                    currency: 'COP',
+                    amountInCents: 10000, // 100 COP
+                    reference: 'TEST-' + Date.now(),
+                    publicKey: PUBLIC_KEY,
+                    redirectUrl: window.location.origin + '/confirmacion',
+                    customerEmail: 'test@example.com',
+                    customerFullName: 'Cliente de Prueba',
+                    customerPhoneNumber: '3001234567'
+                };
+
+                resultDiv.innerHTML = `
+                    <div class="success">✅ Widget cargado</div>
+                    <div class="info">Abriendo checkout...</div>
+                    <pre>${JSON.stringify(checkoutConfig, null, 2)}</pre>
+                `;
+
+                // Crear y abrir el checkout
+                const checkout = new window.WidgetCheckout(checkoutConfig);
+                checkout.open((result) => {
+                    console.log('Checkout result:', result);
+                    resultDiv.innerHTML += `
+                        <div class="success">✅ Checkout completado</div>
+                        <pre>${JSON.stringify(result, null, 2)}</pre>
+                    `;
+                });
+
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">❌ Error al cargar widget</div>
+                    <div>${error.message}</div>
+                `;
+            }
+        };
+
+        // Auto-test al cargar
+        console.log('🧪 Test page loaded. Ready to test Wompi proxy!');
+    </script>
+</body>
+
+</html>
