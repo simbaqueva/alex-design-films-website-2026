@@ -123,6 +123,9 @@
             <button onclick="testCheckoutFlow()" id="test-checkout-btn" disabled>
                 4. Probar Flujo de Pago (Test)
             </button>
+            <button onclick="testSandboxData()" id="test-sandbox-btn" disabled>
+                5. Ver Datos de Prueba Sandbox
+            </button>
         </div>
 
         <div class="test-results" id="results" style="display: none;">
@@ -135,6 +138,7 @@
         // Importar módulos
         import { WOMPI_CONFIG } from './assets/js/config/wompi-config.js';
         import { WompiIntegration, initializeWompi } from './assets/js/modules/wompi-integration.js';
+        import { initializeWompiErrorHandler } from './assets/js/modules/wompi-error-handler.js';
 
         // Variables globales
         let wompiIntegration = null;
@@ -303,6 +307,7 @@
                 showStatus('✅ Integración inicializada correctamente', 'success');
                 addTestResult('Integración Completa', true, 'WompiIntegration inicializado');
                 document.getElementById('test-checkout-btn').disabled = false;
+                document.getElementById('test-sandbox-btn').disabled = false;
 
             } catch (error) {
                 showStatus(`❌ Error en integración completa: ${error.message}`, 'error');
@@ -363,9 +368,82 @@
             }
         };
 
+        // Test 5: Mostrar datos de prueba Sandbox
+        window.testSandboxData = function () {
+            const btn = document.getElementById('test-sandbox-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<div class="loading"></div>Mostrando...';
+
+            try {
+                showStatus('📋 Mostrando datos de prueba oficiales...', 'info');
+
+                // Crear modal o sección con los datos de prueba
+                const sandboxDataHTML = `
+                    <div style="margin-top: 20px; padding: 20px; background: #f8f9fa; border-radius: 5px; border: 1px solid #dee2e6;">
+                        <h3>🧪 Datos de Prueba Oficiales Wompi Sandbox</h3>
+                        
+                        <h4>💳 Tarjetas de Crédito/Débito</h4>
+                        <div style="background: white; padding: 15px; margin: 10px 0; border-radius: 5px;">
+                            <p><strong>Tarjeta Aprobada:</strong> 4242 4242 4242 4242</p>
+                            <p><strong>Tarjeta Declinada:</strong> 4111 1111 1111 1111</p>
+                            <p><em>Cualquier fecha futura y CVC de 3 dígitos son válidos</em></p>
+                        </div>
+
+                        <h4>📱 Nequi</h4>
+                        <div style="background: white; padding: 15px; margin: 10px 0; border-radius: 5px;">
+                            <p><strong>Teléfono Aprobado:</strong> 3991111111</p>
+                            <p><strong>Teléfono Declinado:</strong> 3992222222</p>
+                        </div>
+
+                        <h4>🏦 PSE</h4>
+                        <div style="background: white; padding: 15px; margin: 10px 0; border-radius: 5px;">
+                            <p><strong>Banco que aprueba:</strong> Transacción APROBADA</p>
+                            <p><strong>Banco que rechaza:</strong> Transacción DECLINADA</p>
+                        </div>
+
+                        <h4>💰 Daviplata</h4>
+                        <div style="background: white; padding: 15px; margin: 10px 0; border-radius: 5px;">
+                            <p><strong>OTP Aprobado:</strong> 574829</p>
+                            <p><strong>OTP Declinado:</strong> 932015</p>
+                        </div>
+
+                        <div style="margin-top: 15px; padding: 15px; background: #d1ecf1; border-radius: 5px;">
+                            <p><strong>📝 Nota:</strong> Estos datos solo funcionan en modo Sandbox con llave pública <code>pub_test_</code></p>
+                            <p><strong>📚 Documentación completa:</strong> <a href="./WOMPI_DATOS_PRUEBA.md" target="_blank">WOMPI_DATOS_PRUEBA.md</a></p>
+                        </div>
+                    </div>
+                `;
+
+                // Agregar al contenedor de resultados
+                const resultsDiv = document.getElementById('results');
+                const resultsContent = document.getElementById('results-content');
+
+                resultsDiv.style.display = 'block';
+                resultsContent.innerHTML = sandboxDataHTML;
+
+                showStatus('✅ Datos de prueba mostrados', 'success');
+                addTestResult('Datos de Prueba', true, 'Datos oficiales de Wompi Sandbox');
+
+            } catch (error) {
+                showStatus(`❌ Error al mostrar datos de prueba: ${error.message}`, 'error');
+                addTestResult('Datos de Prueba', false, error.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '5. Ver Datos de Prueba Sandbox';
+            }
+        };
+
         // Inicializar al cargar la página
         document.addEventListener('DOMContentLoaded', () => {
             showStatus('🚀 Página de pruebas lista', 'success');
+
+            // Inicializar manejador de errores de Wompi
+            try {
+                initializeWompiErrorHandler();
+                showStatus('🛡️ Manejador de errores de Wompi inicializado', 'success');
+            } catch (error) {
+                showStatus(`❌ Error al inicializar manejador de errores: ${error.message}`, 'error');
+            }
 
             // Verificar configuración
             try {

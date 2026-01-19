@@ -485,6 +485,10 @@ export class Router {
                 // Cargar configuración
                 const { default: WOMPI_CONFIG } = await import('../config/wompi-config.js');
                 const { initializeWompi } = await import('../modules/wompi-integration.js');
+                const { initializeWompiErrorHandler } = await import('../modules/wompi-error-handler.js');
+
+                // Inicializar manejador de errores primero
+                initializeWompiErrorHandler();
 
                 // Inicializar con la configuración
                 window.wompiIntegration = initializeWompi(WOMPI_CONFIG.getWompiConfig());

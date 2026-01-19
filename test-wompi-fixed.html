@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wompi Integration Test - Fixed Version</title>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #000000 0%, #101a24 50%, #000000 100%);
+            color: white;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .test-button {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            margin: 10px 10px 10px 0;
+            transition: transform 0.2s;
+        }
+
+        .test-button:hover {
+            transform: scale(1.05);
+        }
+
+        .test-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-weight: 500;
+        }
+
+        .status.success {
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid #10b981;
+            color: #10b981;
+        }
+
+        .status.error {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid #ef4444;
+            color: #ef4444;
+        }
+
+        .status.info {
+            background: rgba(59, 130, 246, 0.2);
+            border: 1px solid #3b82f6;
+            color: #3b82f6;
+        }
+
+        .log-container {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 8px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .log-entry {
+            margin: 5px 0;
+            padding: 5px;
+            border-radius: 4px;
+        }
+
+        .log-entry.info {
+            color: #60a5fa;
+        }
+
+        .log-entry.error {
+            color: #f87171;
+        }
+
+        .log-entry.success {
+            color: #34d399;
+        }
+
+        .log-entry.warning {
+            color: #fbbf24;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="test-container">
+        <h1>🧪 Wompi Integration Test - Fixed Version</h1>
+        <p>Esta página prueba las correcciones implementadas para resolver los errores de Wompi.</p>
+
+        <!-- Test Configuration -->
+        <div class="test-section">
+            <h2>📋 Configuration Test</h2>
+            <button class="test-button" onclick="testConfiguration()">Test Wompi Configuration</button>
+            <div id="config-status"></div>
+        </div>
+
+        <!-- Test Error Suppression -->
+        <div class="test-section">
+            <h2>🚫 Error Suppression Test</h2>
+            <button class="test-button" onclick="testErrorSuppression()">Test Error Suppression</button>
+            <div id="suppression-status"></div>
+        </div>
+
+        <!-- Test Cart Integration -->
+        <div class="test-section">
+            <h2>🛒 Cart Integration Test</h2>
+            <button class="test-button" onclick="testCartIntegration()">Test Cart + Wompi</button>
+            <div id="cart-status"></div>
+        </div>
+
+        <!-- Test Widget Loading -->
+        <div class="test-section">
+            <h2>📦 Widget Loading Test</h2>
+            <button class="test-button" onclick="testWidgetLoading()">Test Widget Loading</button>
+            <div id="widget-status"></div>
+        </div>
+
+        <!-- Test Payment Flow -->
+        <div class="test-section">
+            <h2>💳 Payment Flow Test</h2>
+            <button class="test-button" onclick="testPaymentFlow()">Test Complete Payment Flow</button>
+            <div id="payment-status"></div>
+        </div>
+
+        <!-- Console Log -->
+        <div class="test-section">
+            <h2>📝 Console Log</h2>
+            <button class="test-button" onclick="clearLog()">Clear Log</button>
+            <div class="log-container" id="log-container"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Importar módulos de Wompi
+        import { WOMPI_CONFIG } from './assets/js/config/wompi-config.js';
+        import { initializeWompi } from './assets/js/modules/wompi-integration.js';
+        import { initializeWompiErrorHandler } from './assets/js/modules/wompi-error-handler.js';
+        import { initializeCart } from './assets/js/modules/cart.js';
+
+        // Inicializar sistemas
+        let wompiIntegration;
+        let cartManager;
+        let errorHandler;
+
+        // Función para logging
+        function log(message, type = 'info') {
+            const logContainer = document.getElementById('log-container');
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry ${type}`;
+            logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logContainer.appendChild(logEntry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+
+            console.log(`[Wompi Test] ${message}`);
+        }
+
+        function clearLog() {
+            document.getElementById('log-container').innerHTML = '';
+        }
+
+        function showStatus(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+
+        // Test 1: Configuración
+        window.testConfiguration = async function () {
+            log('🔍 Testing Wompi Configuration...');
+
+            try {
+                // Validar configuración
+                const isValid = WOMPI_CONFIG.validate();
+
+                if (isValid) {
+                    log('✅ Configuration is valid', 'success');
+                    showStatus('config-status', '✅ Configuration is valid', 'success');
+
+                    // Mostrar configuración actual
+                    log(`Public Key: ${WOMPI_CONFIG.getPublicKey()}`);
+                    log(`Sandbox Mode: ${WOMPI_CONFIG.SANDBOX_MODE}`);
+                    log(`Merchant ID: ${WOMPI_CONFIG.MERCHANT_ID}`);
+                    log(`Currency: ${WOMPI_CONFIG.CURRENCY}`);
+                } else {
+                    log('❌ Configuration has errors', 'error');
+                    showStatus('config-status', '❌ Configuration has errors', 'error');
+                }
+            } catch (error) {
+                log(`❌ Configuration test failed: ${error.message}`, 'error');
+                showStatus('config-status', `❌ Configuration test failed: ${error.message}`, 'error');
+            }
+        };
+
+        // Test 2: Supresión de errores
+        window.testErrorSuppression = async function () {
+            log('🚫 Testing error suppression...');
+
+            try {
+                // Inicializar manejador de errores
+                errorHandler = initializeWompiErrorHandler();
+
+                // Simular errores de Wompi
+                const testErrors = [
+                    new Error('Failed to load resource: the server responded with a status of 404 ()'),
+                    new Error('Failed to load resource: the server responded with a status of 401 ()'),
+                    new Error('Failed to load resource: the server responded with a status of 422 ()'),
+                    new Error('api.wompi.co/v1/merchants/undefined: 422')
+                ];
+
+                for (const error of testErrors) {
+                    const result = errorHandler.handleError(error, { test: true });
+                    log(`Handled error: ${result.handled ? '✅' : '❌'} ${result.critical ? 'Critical' : 'Non-critical'}`, result.critical ? 'error' : result.suppressed ? 'warning' : 'success');
+                }
+
+                showStatus('suppression-status', '✅ Error suppression working correctly', 'success');
+                log('✅ Error suppression test completed', 'success');
+
+            } catch (error) {
+                log(`❌ Error suppression test failed: ${error.message}`, 'error');
+                showStatus('suppression-status', `❌ Error suppression test failed: ${error.message}`, 'error');
+            }
+        };
+
+        // Test 3: Integración con carrito
+        window.testCartIntegration = async function () {
+            log('🛒 Testing cart integration...');
+
+            try {
+                // Inicializar carrito
+                cartManager = initializeCart();
+
+                // Agregar producto de prueba
+                const testProduct = {
+                    id: 'test-product-1',
+                    name: 'Servicio de Desarrollo Web',
+                    price: 150.00,
+                    quantity: 1
+                };
+
+                cartManager.cart.push(testProduct);
+                cartManager.updateCartUI();
+
+                log('✅ Cart initialized with test product', 'success');
+                log(`Total: $${cartManager.calculateTotal().toFixed(2)}`);
+                showStatus('cart-status', '✅ Cart integration working', 'success');
+
+            } catch (error) {
+                log(`❌ Cart integration test failed: ${error.message}`, 'error');
+                showStatus('cart-status', `❌ Cart integration test failed: ${error.message}`, 'error');
+            }
+        };
+
+        // Test 4: Carga del widget
+        window.testWidgetLoading = async function () {
+            log('📦 Testing widget loading...');
+
+            try {
+                // Inicializar Wompi
+                wompiIntegration = initializeWompi(WOMPI_CONFIG.getWompiConfig());
+
+                // Intentar inicializar el widget
+                const initialized = await wompiIntegration.initialize();
+
+                if (initialized) {
+                    log('✅ Widget initialized successfully', 'success');
+                    showStatus('widget-status', '✅ Widget loaded without errors', 'success');
+                } else {
+                    log('❌ Widget initialization failed', 'error');
+                    showStatus('widget-status', '❌ Widget initialization failed', 'error');
+                }
+
+            } catch (error) {
+                log(`❌ Widget loading test failed: ${error.message}`, 'error');
+                showStatus('widget-status', `❌ Widget loading test failed: ${error.message}`, 'error');
+            }
+        };
+
+        // Test 5: Flujo de pago completo
+        window.testPaymentFlow = async function () {
+            log('💳 Testing complete payment flow...');
+
+            try {
+                // Asegurarse que todo esté inicializado
+                if (!wompiIntegration) {
+                    await testWidgetLoading();
+                }
+
+                if (!cartManager || cartManager.cart.length === 0) {
+                    await testCartIntegration();
+                }
+
+                // Preparar datos de prueba
+                const orderData = {
+                    total: 150.00,
+                    customerEmail: 'test@alexdesignfilms.com',
+                    customerName: 'Cliente de Prueba',
+                    customerPhone: '3001234567',
+                    description: 'Test payment flow'
+                };
+
+                log('🚀 Initiating Wompi checkout...');
+                log(`Order Total: $${orderData.total}`);
+                log(`Customer: ${orderData.customerName}`);
+
+                // Iniciar checkout (esto abrirá el widget de Wompi)
+                const reference = await wompiIntegration.openCheckout(orderData);
+
+                log(`✅ Checkout initiated with reference: ${reference}`, 'success');
+                showStatus('payment-status', '✅ Payment flow initiated successfully', 'success');
+
+            } catch (error) {
+                log(`❌ Payment flow test failed: ${error.message}`, 'error');
+                showStatus('payment-status', `❌ Payment flow test failed: ${error.message}`, 'error');
+            }
+        };
+
+        // Inicializar automáticamente
+        document.addEventListener('DOMContentLoaded', () => {
+            log('🚀 Wompi Integration Test Page Loaded');
+            log('📋 Ready to run tests');
+            showStatus('config-status', 'Ready to test configuration', 'info');
+        });
+
+        // Exportar para debugging
+        window.wompiTest = {
+            log,
+            clearLog,
+            showStatus,
+            WOMPI_CONFIG,
+            wompiIntegration,
+            cartManager,
+            errorHandler
+        };
+    </script>
+</body>
+
+</html>

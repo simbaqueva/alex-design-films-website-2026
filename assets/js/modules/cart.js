@@ -841,40 +841,125 @@ export class CartManager {
      * Procesar pago con método seleccionado
      */
     async processPayment(method, orderData) {
-        this.showNotification(`Redirigiendo a pasarela de pagos...`, 'info');
+        this.showNotification(`Procesando pago con ${method}...`, 'info');
 
         try {
-            // Simular procesamiento de pago
-            await Helpers.wait(2000);
-
-            // Redirigir a ventana en blanco temporalmente
+            // Cerrar modal de pago primero
             this.closePaymentModal();
 
-            // Crear ventana de pago temporal
-            const paymentWindow = window.open('', '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes');
+            // Procesar según el método de pago
+            switch (method) {
+                case 'wompi':
+                    await this.processWompiPayment(orderData);
+                    break;
+                case 'paypal':
+                    await this.processPayPalPayment(orderData);
+                    break;
+                case 'stripe':
+                    await this.processStripePayment(orderData);
+                    break;
+                case 'mercadopago':
+                    await this.processMercadoPagoPayment(orderData);
+                    break;
+                default:
+                    throw new Error(`Método de pago no soportado: ${method}`);
+            }
 
-            // Esperar un poco y luego redirigir
-            setTimeout(() => {
-                paymentWindow.location.href = 'https://example.com/payment'; // Cambiar esto por la pasarela real
-            }, 1000);
+        } catch (error) {
+            this.showNotification(`Error al procesar pago con ${method}: ${error.message}`, 'error');
+            console.error('Payment error:', error);
+        }
+    }
 
-            this.clearCart();
-            this.showNotification('Redirigiendo a pasarela de pagos...', 'info', {
-                title: 'Procesando Pago',
-                persistent: true
-            });
+    /**
+     * Procesar pago con Wompi
+     */
+    async processWompiPayment(orderData) {
+        try {
+            // Importar e inicializar Wompi solo cuando se necesite
+            const { initializeWompi } = await import('./wompi-integration.js');
 
-            // Disparar evento de compra completada
-            this.dispatchCartEvent('purchase-completed', {
-                method,
-                orderData,
+            // Importar configuración de Wompi
+            const { WOMPI_CONFIG } = await import('../config/wompi-config.js');
+
+            // Inicializar Wompi con la configuración correcta
+            const wompiIntegration = initializeWompi(WOMPI_CONFIG.getWompiConfig());
+
+            // Preparar datos para Wompi
+            const wompiOrderData = {
+                total: orderData.total,
+                customerEmail: orderData.customerEmail || 'cliente@alexdesignfilms.com',
+                customerName: orderData.customerName || 'Cliente Alex Design Films',
+                customerPhone: orderData.customerPhone || '3001234567',
+                customerDocument: orderData.customerDocument || '1234567890',
+                description: `Compra Alex Design Films - ${orderData.itemCount} productos`
+            };
+
+            console.log('🚀 Initiating Wompi payment:', wompiOrderData);
+
+            // Abrir checkout de Wompi
+            const reference = await wompiIntegration.openCheckout(wompiOrderData);
+
+            // Disparar evento de compra iniciada
+            this.dispatchCartEvent('purchase-initiated', {
+                method: 'wompi',
+                orderData: wompiOrderData,
+                reference,
                 timestamp: Date.now()
             });
 
         } catch (error) {
-            this.showNotification(`Error al procesar pago con ${method}`, 'error');
-            console.error('Payment error:', error);
+            console.error('Wompi payment error:', error);
+            throw new Error(`Error al procesar pago con Wompi: ${error.message}`);
         }
+    }
+
+    /**
+     * Procesar pago con PayPal (placeholder)
+     */
+    async processPayPalPayment(orderData) {
+        // Simular procesamiento de PayPal
+        await Helpers.wait(2000);
+
+        const paymentWindow = window.open('', '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes');
+
+        setTimeout(() => {
+            paymentWindow.location.href = 'https://www.paypal.com/payment'; // URL de ejemplo
+        }, 1000);
+
+        this.showNotification('Redirigiendo a PayPal...', 'info');
+    }
+
+    /**
+     * Procesar pago con Stripe (placeholder)
+     */
+    async processStripePayment(orderData) {
+        // Simular procesamiento de Stripe
+        await Helpers.wait(2000);
+
+        const paymentWindow = window.open('', '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes');
+
+        setTimeout(() => {
+            paymentWindow.location.href = 'https://checkout.stripe.com/pay'; // URL de ejemplo
+        }, 1000);
+
+        this.showNotification('Redirigiendo a Stripe...', 'info');
+    }
+
+    /**
+     * Procesar pago con Mercado Pago (placeholder)
+     */
+    async processMercadoPagoPayment(orderData) {
+        // Simular procesamiento de Mercado Pago
+        await Helpers.wait(2000);
+
+        const paymentWindow = window.open('', '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes');
+
+        setTimeout(() => {
+            paymentWindow.location.href = 'https://mercadopago.com/payment'; // URL de ejemplo
+        }, 1000);
+
+        this.showNotification('Redirigiendo a Mercado Pago...', 'info');
     }
 
     /**

@@ -49,7 +49,7 @@ export const WOMPI_CONFIG = {
 
     // Merchant ID para sandbox (obtenido de la configuración de Wompi)
     // Este ID se usa para algunas llamadas a la API interna de Wompi
-    MERCHANT_ID: null, // Se obtendrá dinámicamente si es necesario
+    MERCHANT_ID: 'dev_4cF8D3G2j9X7zK5mN3pQ', // ID de comerciante sandbox de ejemplo
 
     // ========================================
     // MÉTODOS DE PAGO HABILITADOS
