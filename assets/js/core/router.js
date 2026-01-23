@@ -446,7 +446,7 @@ export class Router {
             });
         }
 
-        // Botón de checkout - Abrir Wompi
+        // Botón de checkout - Abrir Wompi directamente
         const checkoutBtn = document.getElementById('cart-page-checkout');
         if (checkoutBtn) {
             checkoutBtn.addEventListener('click', async (e) => {
@@ -631,7 +631,12 @@ export class Router {
             }
         } else {
             checkoutBtn.disabled = false;
-            checkoutBtn.innerHTML = 'Procesar Pago';
+            checkoutBtn.innerHTML = `
+                <svg class="payment-button__icon" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z" />
+                </svg>
+                <span class="payment-button__text">Proceder al Pago</span>
+            `;
         }
     }
 
@@ -1126,10 +1131,7 @@ router.register('carrito', 'cart-page.html', {
     description: 'Gestiona tus productos seleccionados.'
 });
 
-router.register('pago', 'payment-page.html', {
-    title: 'Pago - Álvaro Alexander',
-    description: 'Procesar pago de tu pedido.'
-});
+// La ruta de pago ha sido eliminada - ahora el pago se procesa directamente desde el carrito
 
 router.register('confirmacion', 'confirmation-page.html', {
     title: 'Confirmación - Álvaro Alexander',
