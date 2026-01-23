@@ -301,8 +301,20 @@ export class WompiErrorHandler {
 
 /**
  * Inicializar manejador de errores de Wompi
+ * DESACTIVADO COMPLETAMENTE - Usando wompi-error-suppressor.js global
  */
 export function initializeWompiErrorHandler() {
+    // DESACTIVADO: El supresor global maneja todo
+    console.log('⚠️ WompiErrorHandler DESACTIVADO - usando supresor global');
+
+    // Retornar objeto dummy para compatibilidad
+    return {
+        handleError: () => ({ handled: true, critical: false }),
+        createErrorInterceptor: () => () => { },
+        restoreConsole: () => { }
+    };
+
+    /* CÓDIGO ORIGINAL DESACTIVADO:
     if (!window.wompiErrorHandler) {
         window.wompiErrorHandler = new WompiErrorHandler();
 
@@ -315,6 +327,7 @@ export function initializeWompiErrorHandler() {
         console.log('🛡️ Wompi Error Handler initialized');
     }
     return window.wompiErrorHandler;
+    */
 }
 
 export default WompiErrorHandler;
