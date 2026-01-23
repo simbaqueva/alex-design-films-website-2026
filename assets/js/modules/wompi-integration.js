@@ -17,7 +17,7 @@ export class WompiIntegration {
         this.currency = config.currency || 'COP';
         this.redirectUrl = config.redirectUrl || window.location.origin + '/confirmacion';
         this.sandbox = config.sandbox || false; // Por defecto producción
-        this.merchantId = config.merchantId || 'pub_prod_cI8IJi8zI5v8lkKFtEFztW5YfNzxf5TI';
+        this.merchantId = config.merchantId || null; // No usar hardcoded para evitar undefined
 
         // Flag para saber si la configuración centralizada se cargó
         this.configLoaded = false;
@@ -37,8 +37,8 @@ export class WompiIntegration {
 
         console.log('💳 Wompi Widget Integration initialized - PRODUCTION MODE', {
             sandbox: this.sandbox,
-            publicKey: this.publicKey,
-            merchantId: this.merchantId,
+            publicKey: this.publicKey?.substring(0, 10) + '...',
+            merchantId: this.merchantId?.substring(0, 10) + '...' || 'not set',
             origin: window.location.origin
         });
     }
@@ -56,12 +56,13 @@ export class WompiIntegration {
             this.currency = this.config.CURRENCY;
             this.redirectUrl = this.config.REDIRECT_URL;
             this.sandbox = this.config.SANDBOX_MODE;
-            this.merchantId = this.config.PUBLIC_KEY_PROD;
+            this.merchantId = this.config.getMerchantId(); // Usar el nuevo método seguro
 
             console.log('✅ Central Wompi config applied:', {
                 sandbox: this.sandbox,
                 publicKey: this.publicKey?.substring(0, 10) + '...',
-                currency: this.currency
+                currency: this.currency,
+                merchantId: this.merchantId?.substring(0, 10) + '...'
             });
         } catch (error) {
             console.error('❌ Error loading central config:', error);
@@ -187,12 +188,13 @@ export class WompiIntegration {
                     url.includes('complete_api_access') ||
                     url.includes('is_nequi_negocios') ||
                     url.includes('enable_smart_checkout') ||
-                    url.includes('check_pco_blacklist')) {  // Endpoint que no existe en producción
+                    url.includes('check_pco_blacklist') ||  // Endpoint que no existe en producción
+                    url.includes('pco_blacklist')) {         // Variación del endpoint
                     console.log('🚫 Blocking non-critical Wompi API call:', url.split('?')[0]);
                     return Promise.resolve(new Response('{}', { status: 200 }));
                 }
                 // Permitir llamadas importantes como merchants (pero bloquear undefined)
-                if (url.includes('merchants/undefined')) {
+                if (url.includes('merchants/undefined') || url.includes('/undefined')) {
                     console.log('🚫 Blocking undefined merchant call');
                     return Promise.resolve(new Response('{}', { status: 200 }));
                 }

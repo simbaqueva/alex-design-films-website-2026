@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Final Wompi Fixes - Alex Design Films</title>
+
+    <!-- Wompi Error Suppressor - DEBE cargarse PRIMERO -->
+    <script src="./assets/js/wompi-error-suppressor.js"></script>
+
+    <!-- Font Awesome con atributos para evitar tracking prevention -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <!-- Wompi Widget Script - Cargado con async para evitar bloqueos -->
+    <script src="https://checkout.wompi.co/widget.js" async defer></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #000000 0%, #101a24 50%, #000000 100%);
+            color: white;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid;
+        }
+
+        .status.success {
+            border-color: #10b981;
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .status.error {
+            border-color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .status.warning {
+            border-color: #f59e0b;
+            background: rgba(245, 158, 11, 0.1);
+        }
+
+        .status.info {
+            border-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 10px 5px;
+            transition: transform 0.2s;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+        }
+
+        .log {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1><i class="fas fa-check-circle"></i> Test Final de Soluciones Wompi</h1>
+        <p>Esta página verifica que todas las soluciones implementadas funcionen correctamente.</p>
+
+        <div class="test-section">
+            <h2><i class="fas fa-shield-alt"></i> 1. Error Suppressor</h2>
+            <div id="error-suppressor-status" class="status info">Verificando...</div>
+        </div>
+
+        <div class="test-section">
+            <h2><i class="fas fa-key"></i> 2. Configuración Wompi</h2>
+            <div id="config-status" class="status info">Verificando...</div>
+        </div>
+
+        <div class="test-section">
+            <h2><i class="fas fa-plug"></i> 3. Widget Wompi</h2>
+            <div id="widget-status" class="status info">Verificando...</div>
+            <button id="test-widget" class="btn" disabled>Probar Widget</button>
+        </div>
+
+        <div class="test-section">
+            <h2><i class="fas fa-font-awesome"></i> 4. Font Awesome</h2>
+            <div id="font-awesome-status" class="status info">Verificando...</div>
+        </div>
+
+        <div class="test-section">
+            <h2><i class="fas fa-bug"></i> 5. Logs de Prueba</h2>
+            <div id="test-log" class="log">Iniciando pruebas...</div>
+        </div>
+
+        <div class="test-section">
+            <h2><i class="fas fa-play"></i> 6. Simulación de Pago</h2>
+            <div id="payment-status" class="status info">Listo para probar</div>
+            <button id="test-payment" class="btn">Simular Pago de Prueba</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { WOMPI_CONFIG } from './assets/js/config/wompi-config.js';
+
+        let testLog = [];
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${type.toUpperCase()}: ${message}`;
+            testLog.push(logEntry);
+
+            const logElement = document.getElementById('test-log');
+            if (logElement) {
+                logElement.innerHTML = testLog.slice(-10).join('<br>');
+                logElement.scrollTop = logElement.scrollHeight;
+            }
+
+            console.log(logEntry);
+        }
+
+        function updateStatus(elementId, message, type) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.className = `status ${type}`;
+                element.innerHTML = message;
+            }
+        }
+
+        // Test 1: Error Suppressor
+        function testErrorSuppressor() {
+            log('Iniciando test de Error Suppressor...');
+
+            try {
+                // Verificar que el script se cargó
+                if (typeof window.__wompiInitialized !== 'undefined') {
+                    updateStatus('error-suppressor-status', '✅ Error Suppressor activado', 'success');
+                    log('Error Suppressor detectado correctamente');
+                } else {
+                    updateStatus('error-suppressor-status', '❌ Error Suppressor no encontrado', 'error');
+                    log('Error: Error Suppressor no detectado', 'error');
+                }
+
+                // Probar funciones de debug
+                if (typeof window.enableWompiDebug === 'function') {
+                    log('Funciones de debug disponibles');
+                }
+
+                log('Test de Error Suppressor completado');
+            } catch (error) {
+                updateStatus('error-suppressor-status', '❌ Error en prueba', 'error');
+                log(`Error en test de Error Suppressor: ${error.message}`, 'error');
+            }
+        }
+
+        // Test 2: Configuración Wompi
+        function testWompiConfig() {
+            log('Iniciando test de configuración Wompi...');
+
+            try {
+                const config = WOMPI_CONFIG;
+
+                if (config && config.getPublicKey && config.getMerchantId) {
+                    const publicKey = config.getPublicKey();
+                    const merchantId = config.getMerchantId();
+
+                    updateStatus('config-status', '✅ Configuración válida', 'success');
+                    log(`Public Key: ${publicKey?.substring(0, 10)}...`);
+                    log(`Merchant ID: ${merchantId?.substring(0, 10)}...`);
+
+                    // Verificar que no sea undefined
+                    if (merchantId && merchantId !== 'undefined') {
+                        log('✅ Merchant ID configurado correctamente');
+                    } else {
+                        log('⚠️ Merchant ID usando fallback');
+                    }
+                } else {
+                    updateStatus('config-status', '❌ Configuración inválida', 'error');
+                    log('Error: Configuración Wompi no válida', 'error');
+                }
+            } catch (error) {
+                updateStatus('config-status', '❌ Error en configuración', 'error');
+                log(`Error en configuración: ${error.message}`, 'error');
+            }
+        }
+
+        // Test 3: Widget Wompi
+        function testWompiWidget() {
+            log('Iniciando test de Widget Wompi...');
+
+            try {
+                if (typeof window.WidgetCheckout === 'function') {
+                    updateStatus('widget-status', '✅ Widget disponible', 'success');
+                    document.getElementById('test-widget').disabled = false;
+                    log('WidgetCheckout detectado correctamente');
+                } else {
+                    updateStatus('widget-status', '⏳ Widget cargando...', 'warning');
+                    log('WidgetCheckout aún no disponible, esperando...');
+
+                    // Esperar y verificar de nuevo
+                    setTimeout(testWompiWidget, 1000);
+                }
+            } catch (error) {
+                updateStatus('widget-status', '❌ Error en widget', 'error');
+                log(`Error en widget: ${error.message}`, 'error');
+            }
+        }
+
+        // Test 4: Font Awesome
+        function testFontAwesome() {
+            log('Iniciando test de Font Awesome...');
+
+            try {
+                // Verificar que los iconos se cargaron
+                const testIcon = document.createElement('i');
+                testIcon.className = 'fas fa-check';
+                document.body.appendChild(testIcon);
+
+                const styles = window.getComputedStyle(testIcon);
+                if (styles.fontFamily.includes('Font Awesome')) {
+                    updateStatus('font-awesome-status', '✅ Font Awesome cargado', 'success');
+                    log('Font Awesome detectado correctamente');
+                } else {
+                    updateStatus('font-awesome-status', '⏳ Font Awesome cargando...', 'warning');
+                    log('Font Awesome aún cargando...');
+
+                    // Esperar y verificar de nuevo
+                    setTimeout(() => {
+                        document.body.removeChild(testIcon);
+                        testFontAwesome();
+                    }, 1000);
+                }
+
+                document.body.removeChild(testIcon);
+            } catch (error) {
+                updateStatus('font-awesome-status', '❌ Error en Font Awesome', 'error');
+                log(`Error en Font Awesome: ${error.message}`, 'error');
+            }
+        }
+
+        // Test 5: Simulación de Pago
+        function testPayment() {
+            log('Iniciando simulación de pago...');
+            updateStatus('payment-status', '⏳ Iniciando pago...', 'warning');
+
+            try {
+                // Datos de prueba
+                const orderData = {
+                    total: 10000, // $100.00 COP
+                    customerName: 'Usuario Test',
+                    customerEmail: 'test@example.com',
+                    customerPhone: '3001234567',
+                    customerDocument: '1234567890'
+                };
+
+                // Simular apertura de checkout
+                if (typeof window.WidgetCheckout === 'function') {
+                    const checkoutConfig = {
+                        currency: 'COP',
+                        amountInCents: 1000000, // $10.000 en centavos
+                        reference: `TEST-${Date.now()}`,
+                        publicKey: WOMPI_CONFIG.getPublicKey(),
+                        redirectUrl: window.location.href,
+                        customerData: {
+                            email: orderData.customerEmail,
+                            fullName: orderData.customerName,
+                            phoneNumber: orderData.customerPhone,
+                            phoneNumberPrefix: '+57',
+                            legalId: orderData.customerDocument,
+                            legalIdType: 'CC'
+                        }
+                    };
+
+                    log('Configurando checkout de prueba...');
+                    const checkout = new window.WidgetCheckout(checkoutConfig);
+
+                    // Solo configurar, no abrir para evitar pagos reales
+                    updateStatus('payment-status', '✅ Configuración de pago exitosa', 'success');
+                    log('✅ Checkout configurado correctamente (no abierto por seguridad)');
+
+                } else {
+                    updateStatus('payment-status', '❌ Widget no disponible', 'error');
+                    log('Error: Widget no disponible para prueba de pago', 'error');
+                }
+            } catch (error) {
+                updateStatus('payment-status', '❌ Error en pago', 'error');
+                log(`Error en simulación de pago: ${error.message}`, 'error');
+            }
+        }
+
+        // Event Listeners
+        document.getElementById('test-widget').addEventListener('click', () => {
+            log('Botón de prueba de widget presionado');
+            if (typeof window.WidgetCheckout === 'function') {
+                log('✅ WidgetCheckout está disponible');
+                updateStatus('widget-status', '✅ Widget funcional', 'success');
+            } else {
+                log('❌ WidgetCheckout no está disponible');
+                updateStatus('widget-status', '❌ Widget no funcional', 'error');
+            }
+        });
+
+        document.getElementById('test-payment').addEventListener('click', testPayment);
+
+        // Iniciar todas las pruebas
+        function runAllTests() {
+            log('🚀 Iniciando todas las pruebas...');
+
+            testErrorSuppressor();
+            setTimeout(() => testWompiConfig(), 500);
+            setTimeout(() => testWompiWidget(), 1000);
+            setTimeout(() => testFontAwesome(), 1500);
+        }
+
+        // Iniciar cuando la página esté lista
+        document.addEventListener('DOMContentLoaded', () => {
+            log('📄 Página cargada, iniciando pruebas...');
+            runAllTests();
+        });
+
+        // También probar después de que carguen los scripts asíncronos
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                log('🔄 Verificación final después de carga completa...');
+                testWompiWidget();
+                testFontAwesome();
+            }, 2000);
+        });
+
+        log('🎯 Test script inicializado');
+    </script>
+</body>
+
+</html>

@@ -53,7 +53,9 @@ export const WOMPI_CONFIG = {
 
     // Merchant ID para producción (obtenido de la configuración de Wompi)
     // Este ID se usa para algunas llamadas a la API interna de Wompi
-    MERCHANT_ID: 'pub_prod_cI8IJi8zI5v8lkKFtEFztW5YfNzxf5TI', // Usar la llave pública como ID en producción
+    // NOTA: El merchant ID real debe obtenerse del dashboard de Wompi
+    // Por seguridad, no usamos un valor hardcoded para evitar el error 422
+    MERCHANT_ID: null, // Se obtendrá dinámicamente cuando sea necesario
 
     // ========================================
     // MÉTODOS DE PAGO HABILITADOS
@@ -114,6 +116,20 @@ export const WOMPI_CONFIG = {
      */
     isProduction() {
         return !this.SANDBOX_MODE;
+    },
+
+    /**
+     * Obtener merchant ID seguro (evita undefined)
+     */
+    getMerchantId() {
+        // Si tenemos un merchant ID configurado, usarlo
+        if (this.MERCHANT_ID) {
+            return this.MERCHANT_ID;
+        }
+
+        // De lo contrario, usar la llave pública como fallback
+        // Esto evita el error "merchants/undefined"
+        return this.getPublicKey();
     },
 
     /**

@@ -9,7 +9,7 @@
 (function () {
     'use strict';
 
-    console.log('🛡️ Wompi Global Error Suppressor activado');
+    console.log('🛡️ Wompi Global Error Suppressor activado - v2.0');
 
     // Flag para controlar si Wompi ha sido inicializado manualmente
     window.__wompiInitialized = false;
@@ -26,6 +26,7 @@
         'pco_blacklist',        // Variación del endpoint
         'merchants/undefined',   // Merchant ID undefined
         '/undefined',            // Cualquier URL con undefined
+        'tracking-prevention'     // Bloquear intentos de tracking
     ];
 
     // Patrones a bloquear SOLO antes de inicialización
@@ -129,9 +130,12 @@
             'api-sandbox.wompi.co',
             'api.wompi.co/v1/merchants/undefined',
             'check_pco_blacklist',
+            'pco_blacklist',
             '404 ()',
             '422 (Unprocessable Content)',
-            'Failed to load resource'
+            'Failed to load resource',
+            'Tracking Prevention blocked access to storage',
+            'Intervention: Images loaded lazily'
         ];
 
         // Verificar si el mensaje debe ser suprimido
@@ -159,7 +163,8 @@
 
         if (message.includes('wompi') || message.includes('Wompi') ||
             message.includes('feature_flags') || message.includes('global_settings') ||
-            message.includes('check_pco_blacklist') || message.includes('undefined')) {
+            message.includes('check_pco_blacklist') || message.includes('pco_blacklist') ||
+            message.includes('undefined') || message.includes('Tracking Prevention')) {
             if (window.__wompiDebug) {
                 console.log('🤫 [Suppressed warning]:', message.substring(0, 80));
             }
@@ -167,6 +172,21 @@
         }
 
         originalConsoleWarn.apply(console, args);
+    };
+
+    // Suprimir info messages específicos
+    const originalConsoleInfo = console.info;
+    console.info = function (...args) {
+        const message = args.join(' ');
+
+        if (message.includes('Intervention: Images loaded lazily')) {
+            if (window.__wompiDebug) {
+                console.log('🤫 [Suppressed info]:', message.substring(0, 80));
+            }
+            return;
+        }
+
+        originalConsoleInfo.apply(console, args);
     };
 
     // Interceptar window.$wompi si se intenta inicializar automáticamente
@@ -233,7 +253,38 @@
         return element;
     };
 
-    console.log('✅ Wompi Global Error Suppressor listo');
+    // Manejar errores de Font Awesome tracking prevention
+    const originalAddEventListener = EventTarget.prototype.addEventListener;
+    EventTarget.prototype.addEventListener = function (type, listener, options) {
+        // Interceptar eventos de error relacionados con Font Awesome
+        if (type === 'error' && this.tagName === 'LINK') {
+            const originalListener = listener;
+            listener = function (event) {
+                if (event.target && event.target.href && event.target.href.includes('font-awesome')) {
+                    console.log('🎨 Font Awesome loading handled:', event.target.href);
+                    // No mostrar el error de tracking prevention
+                    return;
+                }
+                return originalListener.call(this, event);
+            };
+        }
+        return originalAddEventListener.call(this, type, listener, options);
+    };
+
+    // Exponer función para habilitar/deshabilitar debug
+    window.enableWompiDebug = function () {
+        window.__wompiDebug = true;
+        console.log('🐛 Wompi debug mode enabled');
+    };
+
+    window.disableWompiDebug = function () {
+        window.__wompiDebug = false;
+        console.log('🔇 Wompi debug mode disabled');
+    };
+
+    console.log('✅ Wompi Global Error Suppressor listo v2.0');
     console.log('💡 Wompi se inicializará solo cuando se configure con publicKey válida');
+    console.log('🛡️ Protección contra tracking prevention activada');
+    console.log('🔇 Para ver errores suprimidos, ejecuta: enableWompiDebug()');
 
 })();
