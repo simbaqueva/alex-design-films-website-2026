@@ -113,8 +113,8 @@ class OptimizedSPAHandler(http.server.SimpleHTTPRequestHandler):
             # Extraer la ruta de Wompi (remover /api/wompi/)
             wompi_path = self.path.replace('/api/wompi/', '')
             
-            # URL base de Wompi (sandbox para desarrollo)
-            wompi_base_url = 'https://sandbox.wompi.co/v1/'
+            # URL base de Wompi (PRODUCCIÓN - pagos reales)
+            wompi_base_url = 'https://production.wompi.co/v1/'
             target_url = wompi_base_url + wompi_path
             
             print(f"🔄 Proxy Wompi: {wompi_path}")
@@ -184,8 +184,8 @@ class OptimizedSPAHandler(http.server.SimpleHTTPRequestHandler):
             # Extraer la ruta de Wompi (remover /api/wompi/)
             wompi_path = self.path.replace('/api/wompi/', '')
             
-            # URL base de Wompi (sandbox para desarrollo)
-            wompi_base_url = 'https://sandbox.wompi.co/v1/'
+            # URL base de Wompi (PRODUCCIÓN - pagos reales)
+            wompi_base_url = 'https://production.wompi.co/v1/'
             target_url = wompi_base_url + wompi_path
             
             print(f"🔄 Proxy Wompi GET: {wompi_path}")

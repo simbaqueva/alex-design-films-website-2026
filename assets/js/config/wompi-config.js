@@ -11,7 +11,7 @@ export const WOMPI_CONFIG = {
     // ========================================
     // true = Modo prueba (sandbox)
     // false = Modo producción (pagos reales)
-    SANDBOX_MODE: true,
+    SANDBOX_MODE: false,
 
     // ========================================
     // LLAVES DE API
