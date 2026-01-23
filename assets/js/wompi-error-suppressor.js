@@ -36,12 +36,22 @@
         const url = args[0];
 
         if (typeof url === 'string') {
-            // PERMITIR la carga del widget.js de Wompi
+            // PERMITIR la carga de scripts de Wompi (widget.js, v1.js)
             if (url.includes('checkout.wompi.co/widget.js') ||
                 url.includes('checkout.wompi.co/v1.js') ||
                 url.endsWith('widget.js') ||
                 url.endsWith('v1.js')) {
                 return originalFetch.apply(this, args);
+            }
+
+            // BLOQUEAR TODAS las llamadas a la API de Wompi si no está inicializado
+            if (!window.__wompiInitialized && (url.includes('api.wompi.co') || url.includes('api-sandbox.wompi.co'))) {
+                console.log('🚫 [Global] Blocked pre-init Wompi API call:', url.split('?')[0].split('/').slice(-2).join('/'));
+                return Promise.resolve(new Response(JSON.stringify({}), {
+                    status: 200,
+                    statusText: 'OK',
+                    headers: { 'Content-Type': 'application/json' }
+                }));
             }
 
             // BLOQUEAR patrones que siempre deben bloquearse
@@ -58,16 +68,6 @@
             // BLOQUEAR merchants/undefined SIEMPRE
             if (url.includes('merchants/undefined') || url.includes('/undefined')) {
                 console.log('🚫 [Global] Blocked undefined merchant call');
-                return Promise.resolve(new Response(JSON.stringify({}), {
-                    status: 200,
-                    statusText: 'OK',
-                    headers: { 'Content-Type': 'application/json' }
-                }));
-            }
-
-            // Si Wompi NO está inicializado, bloquear llamadas a merchants
-            if (!window.__wompiInitialized && url.includes('/merchants/')) {
-                console.log('🚫 [Global] Blocked pre-init merchant call');
                 return Promise.resolve(new Response(JSON.stringify({}), {
                     status: 200,
                     statusText: 'OK',
@@ -191,6 +191,37 @@
         },
         configurable: true
     });
+
+    // Interceptar createElement para prevenir carga de scripts adicionales de Wompi
+    const originalCreateElement = document.createElement;
+    document.createElement = function (tagName, options) {
+        const element = originalCreateElement.call(this, tagName, options);
+
+        if (tagName.toLowerCase() === 'script') {
+            // Interceptar cuando se establece el src
+            const originalSrcSetter = Object.getOwnPropertyDescriptor(HTMLScriptElement.prototype, 'src').set;
+            Object.defineProperty(element, 'src', {
+                set: function (value) {
+                    // Si es un script de Wompi v1.js o similar, solo permitir si está inicializado
+                    if (typeof value === 'string' &&
+                        (value.includes('wompi.co/v1.js') || value.includes('wompi') && value.includes('.js'))) {
+
+                        if (!window.__wompiInitialized && !value.includes('widget.js')) {
+                            console.log('🚫 [Global] Blocked dynamic Wompi script:', value.split('/').pop());
+                            // No establecer el src, prevenir la carga
+                            return;
+                        }
+                    }
+                    originalSrcSetter.call(this, value);
+                },
+                get: function () {
+                    return this.getAttribute('src');
+                }
+            });
+        }
+
+        return element;
+    };
 
     console.log('✅ Wompi Global Error Suppressor listo');
     console.log('💡 Wompi se inicializará solo cuando se configure con publicKey válida');
