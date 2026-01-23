@@ -102,14 +102,20 @@ export class WompiIntegration {
         window.fetch = function (...args) {
             const url = args[0];
             if (typeof url === 'string') {
-                // Bloquear llamadas a feature flags y global settings que causan 404
-                if (url.includes('feature_flags') || url.includes('global_settings')) {
-                    console.log('🚫 Blocking Wompi API call:', url);
+                // Bloquear llamadas a feature flags y global settings que causan 404/401
+                // Tanto en sandbox como en producción
+                if (url.includes('feature_flags') ||
+                    url.includes('global_settings') ||
+                    url.includes('checkout_intelligence') ||
+                    url.includes('complete_api_access') ||
+                    url.includes('is_nequi_negocios') ||
+                    url.includes('enable_smart_checkout')) {
+                    console.log('🚫 Blocking non-critical Wompi API call:', url.split('?')[0]);
                     return Promise.resolve(new Response('{}', { status: 200 }));
                 }
-                // Permitir llamadas importantes como merchants
+                // Permitir llamadas importantes como merchants (pero bloquear undefined)
                 if (url.includes('merchants/undefined')) {
-                    console.log('🚫 Blocking undefined merchant call:', url);
+                    console.log('🚫 Blocking undefined merchant call');
                     return Promise.resolve(new Response('{}', { status: 200 }));
                 }
             }

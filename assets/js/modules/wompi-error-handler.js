@@ -52,7 +52,14 @@ export class WompiErrorHandler {
             'checkout_intelligence',
             'feature_flags',
             'global_settings',
-            'merchants/undefined'
+            'merchants/undefined',
+            'complete_api_access',
+            'is_nequi_negocios',
+            'enable_smart_checkout',
+            'api-sandbox.wompi.co',
+            'api.wompi.co/v1/merchants/undefined',
+            '404',
+            '401'
         ];
     }
 
