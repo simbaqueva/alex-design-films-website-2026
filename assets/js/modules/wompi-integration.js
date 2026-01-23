@@ -42,6 +42,8 @@ export class WompiIntegration {
             if (window.WidgetCheckout && typeof window.WidgetCheckout === 'function') {
                 console.log('✅ Wompi Widget already loaded from HTML');
                 this.isInitialized = true;
+                // Marcar como inicializado globalmente para permitir llamadas API
+                window.__wompiInitialized = true;
                 return true;
             }
 
@@ -50,6 +52,8 @@ export class WompiIntegration {
             await this.loadWompiScript();
 
             this.isInitialized = true;
+            // Marcar como inicializado globalmente para permitir llamadas API
+            window.__wompiInitialized = true;
             console.log('✅ Wompi Widget script loaded successfully');
             return true;
         } catch (error) {
