@@ -33,14 +33,21 @@ export class WompiIntegration {
      */
     async initialize() {
         if (this.isInitialized) {
+            console.log('✅ Wompi already initialized');
             return true;
         }
 
         try {
-            // Cargar el script de Wompi si no está cargado
-            if (!window.WidgetCheckout) {
-                await this.loadWompiScript();
+            // Verificar si WidgetCheckout ya está disponible (cargado desde HTML)
+            if (window.WidgetCheckout && typeof window.WidgetCheckout === 'function') {
+                console.log('✅ Wompi Widget already loaded from HTML');
+                this.isInitialized = true;
+                return true;
             }
+
+            // Si no está disponible, intentar cargarlo dinámicamente
+            console.log('🔄 Loading Wompi Widget script dynamically...');
+            await this.loadWompiScript();
 
             this.isInitialized = true;
             console.log('✅ Wompi Widget script loaded successfully');
@@ -132,7 +139,7 @@ export class WompiIntegration {
     /**
      * Esperar a que WidgetCheckout esté disponible
      */
-    waitForWidgetCheckout(maxAttempts = 50, delay = 100) {
+    waitForWidgetCheckout(maxAttempts = 20, delay = 100) {
         return new Promise((resolve, reject) => {
             let attempts = 0;
 
