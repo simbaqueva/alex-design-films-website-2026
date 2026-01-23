@@ -23,6 +23,9 @@
         'is_nequi_negocios',
         'enable_smart_checkout',
         'check_pco_blacklist',  // Endpoint que no existe en producción
+        'pco_blacklist',        // Variación del endpoint
+        'merchants/undefined',   // Merchant ID undefined
+        '/undefined',            // Cualquier URL con undefined
     ];
 
     // Patrones a bloquear SOLO antes de inicialización

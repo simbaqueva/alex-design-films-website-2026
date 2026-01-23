@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Wompi Errors Fixed</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        pre {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 12px;
+            border: 1px solid #e9ecef;
+        }
+
+        .log {
+            background: #000;
+            color: #00ff00;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 11px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🔧 Test Wompi Errors Fixed</h1>
+
+    <div id="test-results">
+        <div class="status info">🔄 Inicializando prueba...</div>
+    </div>
+
+    <!-- Wompi Error Suppressor - DEBE cargarse PRIMERO -->
+    <script src="./assets/js/wompi-error-suppressor.js"></script>
+
+    <!-- Wompi Widget Script -->
+    <script src="https://checkout.wompi.co/widget.js" async defer></script>
+
+    <!-- Configuración y Módulos -->
+    <script type="module">
+        import { WOMPI_CONFIG } from './assets/js/config/wompi-config.js';
+        import { initializeWompi } from './assets/js/modules/wompi-integration.js';
+
+        // Función para mostrar resultados
+        function showStatus(message, type = 'info') {
+            const results = document.getElementById('test-results');
+            results.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+
+        // Función para mostrar logs
+        function showLog(message) {
+            const results = document.getElementById('test-results');
+            const logDiv = document.createElement('div');
+            logDiv.className = 'log';
+            logDiv.textContent = message;
+            results.appendChild(logDiv);
+        }
+
+        // Esperar a que todo cargue
+        window.addEventListener('load', async () => {
+            try {
+                showStatus('🔍 Verificando configuración de Wompi...', 'info');
+
+                // Verificar configuración
+                const configValid = WOMPI_CONFIG.validate();
+                showStatus(configValid ? '✅ Configuración de Wompi válida' : '❌ Configuración de Wompi inválida',
+                    configValid ? 'success' : 'error');
+
+                if (configValid) {
+                    showStatus('🔄 Inicializando Wompi...', 'info');
+
+                    // Intentar inicializar Wompi
+                    const wompiIntegration = initializeWompi(WOMPI_CONFIG.getWompiConfig());
+
+                    if (wompiIntegration) {
+                        showStatus('✅ Wompi inicializado correctamente', 'success');
+
+                        // Verificar que esté disponible globalmente
+                        if (window.wompiIntegration) {
+                            showStatus('✅ Wompi disponible globalmente', 'success');
+                        } else {
+                            showStatus('❌ Wompi no disponible globalmente', 'error');
+                        }
+
+                        // Verificar que el widget esté cargado
+                        if (window.WidgetCheckout && typeof window.WidgetCheckout === 'function') {
+                            showStatus('✅ WidgetCheckout disponible', 'success');
+                        } else {
+                            showStatus('❌ WidgetCheckout no disponible', 'error');
+                        }
+
+                        // Verificar que el error suppressor esté activo
+                        if (window.__wompiInitialized) {
+                            showStatus('✅ Error suppressor activo', 'success');
+                        } else {
+                            showStatus('❌ Error suppressor no activo', 'warning');
+                        }
+
+                    } else {
+                        showStatus('❌ Error al inicializar Wompi', 'error');
+                    }
+                } else {
+                    showStatus('❌ Saltando inicialización de Wompi por configuración inválida', 'warning');
+                }
+
+                // Mostrar resumen
+                const summary = document.createElement('div');
+                summary.innerHTML = `
+                    <h3>📋 Resumen de la prueba</h3>
+                    <div class="status ${configValid ? 'success' : 'error'}">
+                        Configuración: ${configValid ? 'Válida' : 'Inválida'}
+                    </div>
+                    <div class="status ${window.__wompiInitialized ? 'success' : 'error'}">
+                        Error Suppressor: ${window.__wompiInitialized ? 'Activo' : 'Inactivo'}
+                    </div>
+                    <div class="status ${window.WidgetCheckout ? 'success' : 'error'}">
+                        WidgetCheckout: ${window.WidgetCheckout ? 'Disponible' : 'No disponible'}
+                    </div>
+                    <div class="status ${window.wompiIntegration ? 'success' : 'error'}">
+                        Integración: ${window.wompiIntegration ? 'Exitosa' : 'Fallida'}
+                    </div>
+                `;
+                document.getElementById('test-results').appendChild(summary);
+
+            } catch (error) {
+                showStatus(`❌ Error en la prueba: ${error.message}`, 'error');
+                showLog(`Error detallado: ${error.stack}`, 'error');
+            }
+        });
+
+        // Capturar errores de consola
+        const originalError = console.error;
+        console.error = function (...args) {
+            showLog(`❌ CONSOLE ERROR: ${args.join(' ')}`);
+            originalError.apply(console, args);
+        };
+
+        const originalWarn = console.warn;
+        console.warn = function (...args) {
+            showLog(`⚠️ CONSOLE WARNING: ${args.join(' ')}`);
+            originalWarn.apply(console, args);
+        };
+    </script>
+</body>
+
+</html>

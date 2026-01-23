@@ -8,6 +8,8 @@
 import { Helpers } from '../utils/helpers.js';
 import { NotificationManager, getNotificationManager } from '../modules/notifications.js';
 import { CartManager, getCartManager } from '../modules/cart.js';
+import { initializeWompi } from '../modules/wompi-integration.js';
+import { WOMPI_CONFIG } from '../config/wompi-config.js';
 
 /**
  * Clase principal de la aplicación
@@ -33,6 +35,9 @@ export class AlexDesignApp {
 
             // Inicializar módulos principales
             await this.initializeModules();
+
+            // Inicializar Wompi si está configurado
+            this.initializeWompiIntegration();
 
             // Configurar event listeners globales
             this.setupEventListeners();
@@ -64,6 +69,33 @@ export class AlexDesignApp {
         } catch (error) {
             console.error('❌ Error initializing app:', error);
             this.handleCriticalError(error);
+        }
+    }
+
+    /**
+     * Inicializar integración con Wompi
+     */
+    initializeWompiIntegration() {
+        try {
+            // Solo inicializar Wompi si tenemos configuración válida
+            if (WOMPI_CONFIG && WOMPI_CONFIG.validate()) {
+                console.log('💳 Inicializando integración con Wompi...');
+
+                // Marcar que Wompi está inicializado globalmente
+                window.__wompiInitialized = true;
+
+                // Inicializar Wompi con la configuración centralizada
+                const wompiIntegration = initializeWompi(WOMPI_CONFIG.getWompiConfig());
+
+                // Hacer disponible globalmente
+                window.wompiIntegration = wompiIntegration;
+
+                console.log('✅ Wompi integration initialized successfully');
+            } else {
+                console.warn('⚠️ Wompi configuration not valid, skipping initialization');
+            }
+        } catch (error) {
+            console.error('❌ Error initializing Wompi:', error);
         }
     }
 
