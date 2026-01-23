@@ -219,8 +219,19 @@ export class WompiErrorHandler {
 
     /**
      * Crear interceptor de console.error para Wompi
+     * DESACTIVADO: Ahora usamos wompi-error-suppressor.js global
      */
     createErrorInterceptor() {
+        // DESACTIVADO para evitar bucle infinito
+        // El supresor global (wompi-error-suppressor.js) maneja esto mejor
+        console.log('⚠️ Error interceptor desactivado - usando supresor global');
+
+        // Retornar función vacía de restauración
+        return () => {
+            console.log('✅ Error interceptor (no-op)');
+        };
+
+        /* CÓDIGO ORIGINAL DESACTIVADO:
         const originalError = console.error;
         const handler = this;
 
@@ -247,6 +258,7 @@ export class WompiErrorHandler {
         return () => {
             console.error = originalError;
         };
+        */
     }
 
     /**
