@@ -28,6 +28,20 @@
         const url = args[0];
 
         if (typeof url === 'string') {
+            // PERMITIR la carga del widget.js de Wompi
+            if (url.includes('checkout.wompi.co/widget.js') ||
+                url.includes('widget.js')) {
+                return originalFetch.apply(this, args);
+            }
+
+            // PERMITIR llamadas importantes de Wompi
+            if (url.includes('/transactions') ||
+                url.includes('/payment_sources') ||
+                url.includes('/tokens') ||
+                url.includes('/merchants/') && !url.includes('undefined')) {
+                return originalFetch.apply(this, args);
+            }
+
             // Verificar si la URL contiene algún patrón bloqueado
             const shouldBlock = blockedPatterns.some(pattern => url.includes(pattern));
 
@@ -81,7 +95,10 @@
             'api-sandbox.wompi.co',
             'api.wompi.co/v1/merchants/undefined',
             'Failed to load resource',
-            'Uncaught (in promise)'
+            'Uncaught (in promise)',
+            'WidgetCheckout not available',
+            'WidgetCheckout is not available',
+            'widget.js is loaded'
         ];
 
         // Verificar si el mensaje debe ser suprimido
