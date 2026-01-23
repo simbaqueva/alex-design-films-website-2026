@@ -12,21 +12,23 @@ import { WOMPI_CONFIG } from '../config/wompi-config.js';
 
 export class WompiIntegration {
     constructor(config = {}) {
-        // Importar configuración centralizada
-        import('../config/wompi-config.js').then(module => {
-            this.config = module.WOMPI_CONFIG;
-            this.publicKey = this.config.getPublicKey();
-            this.currency = this.config.CURRENCY;
-            this.redirectUrl = this.config.REDIRECT_URL;
-            this.sandbox = this.config.SANDBOX_MODE;
-            this.merchantId = this.config.PUBLIC_KEY_PROD; // Usar la llave pública como merchant ID en producción
-        }).catch(() => {
-            // Fallback si no puede cargar la configuración
-            this.publicKey = config.publicKey || 'pub_prod_cI8IJi8zI5v8lkKFtEFztW5YfNzxf5TI';
-            this.currency = config.currency || 'COP';
-            this.redirectUrl = config.redirectUrl || window.location.origin + '/confirmacion';
-            this.sandbox = false; // Por defecto producción
-            this.merchantId = config.merchantId || 'pub_prod_cI8IJi8zI5v8lkKFtEFztW5YfNzxf5TI';
+        // Configuración inicial con valores por defecto de producción
+        this.publicKey = config.publicKey || 'pub_prod_cI8IJi8zI5v8lkKFtEFztW5YfNzxf5TI';
+        this.currency = config.currency || 'COP';
+        this.redirectUrl = config.redirectUrl || window.location.origin + '/confirmacion';
+        this.sandbox = config.sandbox || false; // Por defecto producción
+        this.merchantId = config.merchantId || 'pub_prod_cI8IJi8zI5v8lkKFtEFztW5YfNzxf5TI';
+
+        // Flag para saber si la configuración centralizada se cargó
+        this.configLoaded = false;
+
+        // Importar configuración centralizada de forma asíncrona
+        this.loadConfig().then(() => {
+            this.configLoaded = true;
+            console.log('✅ Wompi configuration loaded from central config');
+        }).catch((error) => {
+            console.warn('⚠️ Using fallback config:', error);
+            this.configLoaded = true; // Marcar como cargado aunque sea con fallback
         });
 
         // Estado
@@ -38,6 +40,54 @@ export class WompiIntegration {
             publicKey: this.publicKey,
             merchantId: this.merchantId,
             origin: window.location.origin
+        });
+    }
+
+    /**
+     * Cargar configuración centralizada
+     */
+    async loadConfig() {
+        try {
+            const module = await import('../config/wompi-config.js');
+            this.config = module.WOMPI_CONFIG;
+
+            // Actualizar valores con la configuración centralizada
+            this.publicKey = this.config.getPublicKey();
+            this.currency = this.config.CURRENCY;
+            this.redirectUrl = this.config.REDIRECT_URL;
+            this.sandbox = this.config.SANDBOX_MODE;
+            this.merchantId = this.config.PUBLIC_KEY_PROD;
+
+            console.log('✅ Central Wompi config applied:', {
+                sandbox: this.sandbox,
+                publicKey: this.publicKey?.substring(0, 10) + '...',
+                currency: this.currency
+            });
+        } catch (error) {
+            console.error('❌ Error loading central config:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Esperar a que la configuración esté cargada
+     */
+    async waitForConfig() {
+        return new Promise((resolve) => {
+            if (this.configLoaded) {
+                resolve();
+                return;
+            }
+
+            const checkConfig = () => {
+                if (this.configLoaded) {
+                    resolve();
+                } else {
+                    setTimeout(checkConfig, 50);
+                }
+            };
+
+            checkConfig();
         });
     }
 
@@ -209,6 +259,17 @@ export class WompiIntegration {
         try {
             console.log('🔄 Starting Wompi checkout process...');
 
+            // Esperar a que la configuración esté completamente cargada
+            if (!this.configLoaded) {
+                console.log('⏳ Waiting for configuration to load...');
+                await this.waitForConfig();
+            }
+
+            // Validar que tenemos los valores necesarios
+            if (!this.publicKey || !this.currency) {
+                throw new Error('Missing required Wompi configuration: publicKey or currency');
+            }
+
             // Inicializar si no está listo
             if (!this.isInitialized) {
                 console.log('🔄 Initializing Wompi...');
@@ -260,7 +321,7 @@ export class WompiIntegration {
                 reference,
                 amount: amountInCents / 100,
                 currency: this.currency,
-                publicKey: this.publicKey,
+                publicKey: this.publicKey?.substring(0, 10) + '...',
                 redirectUrl: this.redirectUrl,
                 environment: this.sandbox ? 'sandbox' : 'production'
             });
@@ -339,7 +400,7 @@ export class WompiIntegration {
                 errorMessage = 'El widget de pago no está disponible. Recarga la página e intenta nuevamente.';
             } else if (error.message.includes('initialize')) {
                 errorMessage = 'No se pudo inicializar el sistema de pagos. Recarga la página.';
-            } else if (error.message.includes('undefined')) {
+            } else if (error.message.includes('undefined') || error.message.includes('Missing required')) {
                 errorMessage = 'Error de configuración del pago. Por favor contacta soporte.';
             }
 
