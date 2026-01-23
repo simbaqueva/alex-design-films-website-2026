@@ -38,12 +38,13 @@ export class WompiIntegration {
         }
 
         try {
+            // Marcar como en proceso de inicialización
+            window.__wompiInitialized = true;
+
             // Verificar si WidgetCheckout ya está disponible (cargado desde HTML)
             if (window.WidgetCheckout && typeof window.WidgetCheckout === 'function') {
                 console.log('✅ Wompi Widget already loaded from HTML');
                 this.isInitialized = true;
-                // Marcar como inicializado globalmente para permitir llamadas API
-                window.__wompiInitialized = true;
                 return true;
             }
 
@@ -52,12 +53,12 @@ export class WompiIntegration {
             await this.loadWompiScript();
 
             this.isInitialized = true;
-            // Marcar como inicializado globalmente para permitir llamadas API
-            window.__wompiInitialized = true;
             console.log('✅ Wompi Widget script loaded successfully');
             return true;
         } catch (error) {
             console.error('❌ Error loading Wompi script:', error);
+            // Resetear el flag en caso de error
+            window.__wompiInitialized = false;
             return false;
         }
     }
@@ -168,6 +169,13 @@ export class WompiIntegration {
 
             checkWidget();
         });
+    }
+
+    /**
+     * Exponer waitForWidgetCheckout para uso externo
+     */
+    async waitForWidgetCheckoutExternal(maxAttempts = 30, delay = 200) {
+        return this.waitForWidgetCheckout(maxAttempts, delay);
     }
 
     /**

@@ -482,28 +482,48 @@ export class Router {
             // Inicializar Wompi si no está inicializado
             if (!window.wompiIntegration) {
                 console.log('🔄 Initializing Wompi integration...');
-                // Cargar configuración
-                const { default: WOMPI_CONFIG } = await import('../config/wompi-config.js');
-                const { initializeWompi } = await import('../modules/wompi-integration.js');
-                const { initializeWompiErrorHandler } = await import('../modules/wompi-error-handler.js');
+                try {
+                    // Cargar configuración
+                    const { default: WOMPI_CONFIG } = await import('../config/wompi-config.js');
+                    const { initializeWompi } = await import('../modules/wompi-integration.js');
+                    const { initializeWompiErrorHandler } = await import('../modules/wompi-error-handler.js');
 
-                // Inicializar manejador de errores primero
-                initializeWompiErrorHandler();
+                    // Inicializar manejador de errores primero
+                    initializeWompiErrorHandler();
 
-                // Inicializar con la configuración
-                window.wompiIntegration = initializeWompi(WOMPI_CONFIG.getWompiConfig());
+                    // Inicializar con la configuración
+                    window.wompiIntegration = initializeWompi(WOMPI_CONFIG.getWompiConfig());
 
-                // Esperar un momento a que la inicialización se complete
-                await new Promise(resolve => setTimeout(resolve, 500));
+                    // Esperar un momento a que la inicialización se complete
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+
+                    // Forzar inicialización explícita
+                    const initialized = await window.wompiIntegration.initialize();
+                    if (!initialized) {
+                        throw new Error('No se pudo inicializar Wompi después del intento');
+                    }
+
+                } catch (initError) {
+                    console.error('❌ Error during Wompi initialization:', initError);
+                    throw new Error('Error al inicializar el sistema de pagos: ' + initError.message);
+                }
             }
 
-            // Asegurarse de que Wompi esté completamente inicializado
-            if (!window.wompiIntegration.isInitialized) {
-                console.log('🔄 Waiting for Wompi to be fully initialized...');
-                const initialized = await window.wompiIntegration.initialize();
-                if (!initialized) {
-                    throw new Error('No se pudo inicializar Wompi');
+            // Verificar que WidgetCheckout esté disponible
+            if (!window.WidgetCheckout || typeof window.WidgetCheckout !== 'function') {
+                console.error('❌ WidgetCheckout not available, attempting to reload...');
+                // Intentar recargar el script
+                try {
+                    await window.wompiIntegration.loadWompiScript();
+                    await window.wompiIntegration.waitForWidgetCheckoutExternal(30, 200); // Más tiempo y más retries
+                } catch (reloadError) {
+                    throw new Error('El widget de pago no está disponible. Por favor recarga la página.');
                 }
+            }
+
+            // Verificación final
+            if (!window.WidgetCheckout || typeof window.WidgetCheckout !== 'function') {
+                throw new Error('WidgetCheckout no está disponible después de reintentar. Recarga la página.');
             }
 
             // Obtener datos del carrito
@@ -536,7 +556,21 @@ export class Router {
 
         } catch (error) {
             console.error('❌ Error opening checkout:', error);
-            alert(`Error al abrir la pasarela de pago: ${error.message}`);
+
+            // Mensaje de error más específico
+            let errorMessage = 'Error al abrir la pasarela de pago. Por favor intenta nuevamente.';
+
+            if (error.message.includes('WidgetCheckout')) {
+                errorMessage = 'El widget de pago no está disponible. Recarga la página e intenta nuevamente.';
+            } else if (error.message.includes('inicializar')) {
+                errorMessage = 'No se pudo inicializar el sistema de pagos. Recarga la página.';
+            } else if (error.message.includes('undefined')) {
+                errorMessage = 'Error de configuración del pago. Por favor contacta soporte.';
+            } else if (error.message.includes('network') || error.message.includes('fetch')) {
+                errorMessage = 'Error de conexión. Verifica tu internet e intenta nuevamente.';
+            }
+
+            alert(errorMessage);
         } finally {
             // Ocultar loading
             this.showCheckoutLoading(false);

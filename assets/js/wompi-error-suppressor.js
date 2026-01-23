@@ -192,7 +192,7 @@
         configurable: true
     });
 
-    // Interceptar createElement para prevenir carga de scripts adicionales de Wompi
+    // Interceptar createElement para prevenir carga de scripts no deseados de Wompi
     const originalCreateElement = document.createElement;
     document.createElement = function (tagName, options) {
         const element = originalCreateElement.call(this, tagName, options);
@@ -202,13 +202,25 @@
             const originalSrcSetter = Object.getOwnPropertyDescriptor(HTMLScriptElement.prototype, 'src').set;
             Object.defineProperty(element, 'src', {
                 set: function (value) {
-                    // Si es un script de Wompi v1.js o similar, solo permitir si está inicializado
-                    if (typeof value === 'string' &&
-                        (value.includes('wompi.co/v1.js') || value.includes('wompi') && value.includes('.js'))) {
+                    // Si es un script de Wompi, permitir widget.js siempre y otros scripts solo si está inicializado
+                    if (typeof value === 'string' && value.includes('wompi')) {
+                        // Permitir siempre widget.js
+                        if (value.includes('widget.js')) {
+                            console.log('✅ [Global] Allowing Wompi widget.js:', value.split('/').pop());
+                            originalSrcSetter.call(this, value);
+                            return;
+                        }
 
-                        if (!window.__wompiInitialized && !value.includes('widget.js')) {
-                            console.log('🚫 [Global] Blocked dynamic Wompi script:', value.split('/').pop());
-                            // No establecer el src, prevenir la carga
+                        // Permitir v1.js y otros scripts críticos de Wompi
+                        if (value.includes('wompi.co/v1.js') || value.includes('checkout.wompi.co')) {
+                            console.log('✅ [Global] Allowing critical Wompi script:', value.split('/').pop());
+                            originalSrcSetter.call(this, value);
+                            return;
+                        }
+
+                        // Bloquear otros scripts si no está inicializado
+                        if (!window.__wompiInitialized) {
+                            console.log('🚫 [Global] Blocked non-critical Wompi script:', value.split('/').pop());
                             return;
                         }
                     }
