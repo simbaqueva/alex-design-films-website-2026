@@ -1,8 +1,8 @@
 /**
  * ===================================
-   WOMPI CONFIGURATION
+   WOMPI CONFIGURATION - PRODUCTION MODE
    ===================================
- * Configuración centralizada para Wompi
+ * Configuración centralizada para Wompi - MODO PRODUCCIÓN
  */
 
 export const WOMPI_CONFIG = {
@@ -11,7 +11,7 @@ export const WOMPI_CONFIG = {
     // ========================================
     // true = Modo prueba (sandbox)
     // false = Modo producción (pagos reales)
-    SANDBOX_MODE: false,
+    SANDBOX_MODE: false, // CONFIGURADO PARA PRODUCCIÓN - PAGOS REALES
 
     // ========================================
     // LLAVES DE API
@@ -37,8 +37,7 @@ export const WOMPI_CONFIG = {
     CURRENCY: 'COP',
 
     // URL de redirección después del pago
-    // En modo sandbox, Wompi acepta localhost y GitHub Pages
-    // En producción, debe ser una URL pública HTTPS
+    // En modo producción, debe ser una URL pública HTTPS
     REDIRECT_URL: (() => {
         // Detectar si estamos en GitHub Pages
         const isGitHubPages = window.location.hostname.includes('github.io');
@@ -52,9 +51,9 @@ export const WOMPI_CONFIG = {
     MERCHANT_NAME: 'Alex Design Films',
     MERCHANT_EMAIL: 'contacto@alexdesignfilms.com',
 
-    // Merchant ID para sandbox (obtenido de la configuración de Wompi)
+    // Merchant ID para producción (obtenido de la configuración de Wompi)
     // Este ID se usa para algunas llamadas a la API interna de Wompi
-    MERCHANT_ID: 'dev_4cF8D3G2j9X7zK5mN3pQ', // ID de comerciante sandbox de ejemplo
+    MERCHANT_ID: 'pub_prod_cI8IJi8zI5v8lkKFtEFztW5YfNzxf5TI', // Usar la llave pública como ID en producción
 
     // ========================================
     // MÉTODOS DE PAGO HABILITADOS
@@ -97,7 +96,7 @@ export const WOMPI_CONFIG = {
     CHECKOUT_TIMEOUT: 1800, // 30 minutos
 
     // Habilitar logs de debug
-    DEBUG_MODE: true,
+    DEBUG_MODE: false, // Desactivado en producción
 
     // ========================================
     // MÉTODOS AUXILIARES
@@ -168,7 +167,7 @@ export const WOMPI_CONFIG = {
             return false;
         }
 
-        this.log('✅ Configuración de Wompi válida');
+        this.log('✅ Configuración de Wompi válida - MODO PRODUCCIÓN');
         return true;
     }
 };

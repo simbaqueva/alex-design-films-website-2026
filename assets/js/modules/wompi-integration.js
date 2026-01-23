@@ -3,27 +3,40 @@
    WOMPI INTEGRATION - WIDGET CHECKOUT
    ===================================
  * Integración con Wompi usando Widget Modal
- * Funciona con localhost en modo sandbox
+ * Configurado para PRODUCCIÓN
  */
 
-// Importar manejador de errores
+// Importar manejador de errores y configuración
 import { initializeWompiErrorHandler } from './wompi-error-handler.js';
+import { WOMPI_CONFIG } from '../config/wompi-config.js';
 
 export class WompiIntegration {
     constructor(config = {}) {
-        // Configuración
-        this.publicKey = config.publicKey || 'pub_test_Q5yDA9xoKdePzhSGeVe9HAqZlX8xnTxh';
-        this.currency = config.currency || 'COP';
-        this.redirectUrl = config.redirectUrl || window.location.origin + '/confirmacion';
-        this.sandbox = config.sandbox !== false;
+        // Importar configuración centralizada
+        import('../config/wompi-config.js').then(module => {
+            this.config = module.WOMPI_CONFIG;
+            this.publicKey = this.config.getPublicKey();
+            this.currency = this.config.CURRENCY;
+            this.redirectUrl = this.config.REDIRECT_URL;
+            this.sandbox = this.config.SANDBOX_MODE;
+            this.merchantId = this.config.PUBLIC_KEY_PROD; // Usar la llave pública como merchant ID en producción
+        }).catch(() => {
+            // Fallback si no puede cargar la configuración
+            this.publicKey = config.publicKey || 'pub_prod_cI8IJi8zI5v8lkKFtEFztW5YfNzxf5TI';
+            this.currency = config.currency || 'COP';
+            this.redirectUrl = config.redirectUrl || window.location.origin + '/confirmacion';
+            this.sandbox = false; // Por defecto producción
+            this.merchantId = config.merchantId || 'pub_prod_cI8IJi8zI5v8lkKFtEFztW5YfNzxf5TI';
+        });
 
         // Estado
         this.isInitialized = false;
         this.currentCheckout = null;
 
-        console.log('💳 Wompi Widget Integration initialized', {
+        console.log('💳 Wompi Widget Integration initialized - PRODUCTION MODE', {
             sandbox: this.sandbox,
             publicKey: this.publicKey,
+            merchantId: this.merchantId,
             origin: window.location.origin
         });
     }
@@ -248,7 +261,8 @@ export class WompiIntegration {
                 amount: amountInCents / 100,
                 currency: this.currency,
                 publicKey: this.publicKey,
-                redirectUrl: this.redirectUrl
+                redirectUrl: this.redirectUrl,
+                environment: this.sandbox ? 'sandbox' : 'production'
             });
 
             // Verificación final de WidgetCheckout
@@ -332,32 +346,6 @@ export class WompiIntegration {
             this.showError(errorMessage);
             throw error;
         }
-    }
-
-    /**
-     * Mostrar advertencia de localhost
-     */
-    showLocalhostWarning() {
-        const message = `
-⚠️ ADVERTENCIA: Estás usando localhost sin HTTPS
-
-Wompi requiere HTTPS para funcionar correctamente.
-
-SOLUCIONES:
-
-1. Usar ngrok (Recomendado):
-   - Ejecuta: .\\start_with_ngrok.bat
-   - Usa la URL HTTPS que te proporciona ngrok
-
-2. Desplegar a producción:
-   - GitHub Pages (HTTPS gratuito)
-   - Netlify, Vercel, etc.
-
-Consulta WOMPI_403_SOLUCION.md para más detalles.
-        `;
-
-        console.warn(message);
-        alert('⚠️ Wompi requiere HTTPS\n\nPor favor usa ngrok o despliega a producción.\n\nConsulta la consola para más detalles.');
     }
 
     /**

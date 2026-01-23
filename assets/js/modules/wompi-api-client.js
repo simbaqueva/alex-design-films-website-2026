@@ -1,24 +1,20 @@
 /**
  * ===================================
-    WOMPI API CLIENT - Proxy Local
+    WOMPI API CLIENT - PRODUCTION MODE
     ===================================
  * Cliente para hacer peticiones a la API de Wompi
- * a través del proxy local en server.py
- * 
- * Esto resuelve los problemas de:
- * - HTTPS requerido por Wompi
- * - CORS en localhost
+ * Configurado para PRODUCCIÓN
  */
 
 export class WompiAPIClient {
     constructor(config = {}) {
         // Configuración
-        this.publicKey = config.publicKey || 'pub_test_Q5yDA9xoKdePzhSGeVe9HAqZlX8xnTxh';
+        this.publicKey = config.publicKey || 'pub_prod_cI8IJi8zI5v8lkKFtEFztW5YfNzxf5TI';
         this.privateKey = config.privateKey || null; // Solo para backend
         this.proxyBaseUrl = config.proxyBaseUrl || '/api/wompi/';
-        this.sandbox = config.sandbox !== false;
+        this.sandbox = false; // Forzado a producción
 
-        console.log('🔌 Wompi API Client initialized (via proxy)', {
+        console.log('🔌 Wompi API Client initialized - PRODUCTION MODE (via proxy)', {
             sandbox: this.sandbox,
             proxyUrl: this.proxyBaseUrl
         });

@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wompi Production Test</title>
+    <script src="https://checkout.wompi.co/widget.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+
+        button {
+            background: #4CAF50;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+
+        button:hover {
+            background: #45a049;
+        }
+
+        .status {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🧪 Wompi Production Mode Test</h1>
+
+    <div class="test-section">
+        <h2>Configuration Check</h2>
+        <div id="config-status" class="status info">Checking configuration...</div>
+        <button onclick="checkConfiguration()">Verify Configuration</button>
+    </div>
+
+    <div class="test-section">
+        <h2>Widget Test</h2>
+        <div id="widget-status" class="status info">Ready to test widget...</div>
+        <button onclick="testWidget()">Test Widget Checkout</button>
+    </div>
+
+    <div class="test-section">
+        <h2>Production API Test</h2>
+        <div id="api-status" class="status info">Ready to test API...</div>
+        <button onclick="testAPI()">Test Production API</button>
+    </div>
+
+    <script type="module">
+        // Import Wompi configuration
+        import('./assets/js/config/wompi-config.js').then(module => {
+            window.WOMPI_CONFIG = module.WOMPI_CONFIG;
+            updateStatus('config-status', 'Configuration loaded', 'success');
+        }).catch(error => {
+            updateStatus('config-status', `Failed to load config: ${error.message}`, 'error');
+        });
+
+        function updateStatus(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.className = `status ${type}`;
+        }
+
+        function checkConfiguration() {
+            if (!window.WOMPI_CONFIG) {
+                updateStatus('config-status', 'Configuration not loaded', 'error');
+                return;
+            }
+
+            const config = window.WOMPI_CONFIG;
+            const checks = [
+                `Sandbox Mode: ${config.SANDBOX_MODE}`,
+                `Public Key: ${config.getPublicKey().substring(0, 10)}...`,
+                `Currency: ${config.CURRENCY}`,
+                `Environment: ${config.isProduction() ? 'PRODUCTION' : 'SANDBOX'}`,
+                `Merchant ID: ${config.MERCHANT_ID.substring(0, 10)}...`
+            ];
+
+            const isValid = config.validate();
+            updateStatus('config-status',
+                checks.join('\n') + '\n' + (isValid ? '✅ Valid' : '❌ Invalid'),
+                isValid ? 'success' : 'error'
+            );
+        }
+
+        async function testWidget() {
+            if (!window.WOMPI_CONFIG) {
+                updateStatus('widget-status', 'Configuration not loaded', 'error');
+                return;
+            }
+
+            try {
+                updateStatus('widget-status', 'Testing widget...', 'info');
+
+                const testConfig = {
+                    currency: window.WOMPI_CONFIG.CURRENCY,
+                    amountInCents: 10000, // $100 COP
+                    reference: 'TEST-' + Date.now(),
+                    publicKey: window.WOMPI_CONFIG.getPublicKey(),
+                    redirectUrl: window.location.href,
+                    customerData: {
+                        email: 'test@alexdesignfilms.com',
+                        fullName: 'Test User',
+                        phoneNumber: '3001234567',
+                        phoneNumberPrefix: '+57',
+                        legalId: '1234567890',
+                        legalIdType: 'CC'
+                    }
+                };
+
+                console.log('Testing widget with config:', testConfig);
+
+                if (typeof window.WidgetCheckout !== 'function') {
+                    throw new Error('WidgetCheckout not available');
+                }
+
+                const checkout = new window.WidgetCheckout(testConfig);
+
+                checkout.open((result) => {
+                    console.log('Widget test result:', result);
+                    if (result.transaction) {
+                        updateStatus('widget-status',
+                            `✅ Widget works! Transaction: ${result.transaction.status}`,
+                            'success'
+                        );
+                    } else {
+                        updateStatus('widget-status', '❌ Widget test failed', 'error');
+                    }
+                });
+
+                updateStatus('widget-status', '✅ Widget opened successfully', 'success');
+
+            } catch (error) {
+                console.error('Widget test error:', error);
+                updateStatus('widget-status', `❌ Widget error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testAPI() {
+            if (!window.WOMPI_CONFIG) {
+                updateStatus('api-status', 'Configuration not loaded', 'error');
+                return;
+            }
+
+            try {
+                updateStatus('api-status', 'Testing production API...', 'info');
+
+                // Test fetch to Wompi production API
+                const testUrl = `https://api.wompi.co/v1/merchants/${window.WOMPI_CONFIG.PUBLIC_KEY_PROD}`;
+
+                const response = await fetch(testUrl, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${window.WOMPI_CONFIG.getPublicKey()}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    updateStatus('api-status',
+                        `✅ API works! Merchant: ${data.data?.name || 'Unknown'}`,
+                        'success'
+                    );
+                } else {
+                    const error = await response.text();
+                    updateStatus('api-status',
+                        `❌ API Error: ${response.status} - ${error}`,
+                        'error'
+                    );
+                }
+
+            } catch (error) {
+                console.error('API test error:', error);
+                updateStatus('api-status', `❌ API error: ${error.message}`, 'error');
+            }
+        }
+
+        // Auto-check configuration on load
+        setTimeout(checkConfiguration, 1000);
+    </script>
+</body>
+
+</html>
