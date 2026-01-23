@@ -116,7 +116,8 @@ export class WompiIntegration {
                     url.includes('checkout_intelligence') ||
                     url.includes('complete_api_access') ||
                     url.includes('is_nequi_negocios') ||
-                    url.includes('enable_smart_checkout')) {
+                    url.includes('enable_smart_checkout') ||
+                    url.includes('check_pco_blacklist')) {  // Endpoint que no existe en producción
                     console.log('🚫 Blocking non-critical Wompi API call:', url.split('?')[0]);
                     return Promise.resolve(new Response('{}', { status: 200 }));
                 }

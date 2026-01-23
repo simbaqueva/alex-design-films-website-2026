@@ -19,6 +19,7 @@
         'complete_api_access',
         'is_nequi_negocios',
         'enable_smart_checkout',
+        'check_pco_blacklist',  // Endpoint que no existe en producción
         'merchants/undefined'
     ];
 
