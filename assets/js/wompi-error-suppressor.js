@@ -38,9 +38,25 @@
             // PERMITIR llamadas importantes de Wompi
             if (url.includes('/transactions') ||
                 url.includes('/payment_sources') ||
-                url.includes('/tokens') ||
-                url.includes('/merchants/') && !url.includes('undefined')) {
+                url.includes('/tokens')) {
                 return originalFetch.apply(this, args);
+            }
+
+            // PERMITIR merchants solo si tiene clave pública válida
+            if (url.includes('/merchants/')) {
+                // Bloquear si contiene undefined
+                if (url.includes('undefined')) {
+                    console.log('🚫 [Global] Blocked merchants/undefined call');
+                    return Promise.resolve(new Response(JSON.stringify({}), {
+                        status: 200,
+                        statusText: 'OK',
+                        headers: { 'Content-Type': 'application/json' }
+                    }));
+                }
+                // Permitir si tiene clave válida
+                if (url.includes('pub_test_') || url.includes('pub_prod_')) {
+                    return originalFetch.apply(this, args);
+                }
             }
 
             // Verificar si la URL contiene algún patrón bloqueado
@@ -95,11 +111,7 @@
             'merchants/undefined',
             'api-sandbox.wompi.co',
             'api.wompi.co/v1/merchants/undefined',
-            'Failed to load resource',
-            'Uncaught (in promise)',
-            'WidgetCheckout not available',
-            'WidgetCheckout is not available',
-            'widget.js is loaded'
+            'check_pco_blacklist'
         ];
 
         // Verificar si el mensaje debe ser suprimido
@@ -123,7 +135,8 @@
         const message = args.join(' ');
 
         if (message.includes('wompi') || message.includes('Wompi') ||
-            message.includes('feature_flags') || message.includes('global_settings')) {
+            message.includes('feature_flags') || message.includes('global_settings') ||
+            message.includes('check_pco_blacklist')) {
             console.log('🤫 [Global] Suppressed warning:', message.substring(0, 100) + '...');
             return;
         }
