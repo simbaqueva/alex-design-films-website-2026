@@ -204,16 +204,11 @@
                 set: function (value) {
                     // Si es un script de Wompi, permitir widget.js siempre y otros scripts solo si está inicializado
                     if (typeof value === 'string' && value.includes('wompi')) {
-                        // Permitir siempre widget.js
-                        if (value.includes('widget.js')) {
-                            console.log('✅ [Global] Allowing Wompi widget.js:', value.split('/').pop());
-                            originalSrcSetter.call(this, value);
-                            return;
-                        }
-
-                        // Permitir v1.js y otros scripts críticos de Wompi
-                        if (value.includes('wompi.co/v1.js') || value.includes('checkout.wompi.co')) {
-                            console.log('✅ [Global] Allowing critical Wompi script:', value.split('/').pop());
+                        // Permitir siempre widget.js y scripts críticos
+                        if (value.includes('widget.js') ||
+                            value.includes('wompi.co/v1.js') ||
+                            value.includes('checkout.wompi.co')) {
+                            console.log('✅ [Global] Allowing Wompi script:', value.split('/').pop());
                             originalSrcSetter.call(this, value);
                             return;
                         }

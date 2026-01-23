@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Wompi Integration Fixed</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+
+        .test-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🧪 Test Wompi Integration Fixed</h1>
+
+    <div class="test-section">
+        <h2>📋 Estado de la Integración</h2>
+        <div id="status-container">
+            <div class="status info">⏳ Iniciando test...</div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🔧 Verificación de Componentes</h2>
+        <div id="components-status">
+            <div class="status info">⏳ Verificando componentes...</div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🛡️ Error Suppressor</h2>
+        <div id="suppressor-status">
+            <div class="status info">⏳ Verificando supresor...</div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>📦 WidgetCheckout</h2>
+        <div id="widget-status">
+            <div class="status info">⏳ Verificando WidgetCheckout...</div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🔄 Prueba de Checkout</h2>
+        <button id="test-checkout" onclick="testCheckout()">🧪 Probar Checkout</button>
+        <div id="checkout-result">
+            <div class="status info">Esperando prueba...</div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>📝 Log de Pruebas</h2>
+        <div id="test-log" class="log"></div>
+        <button onclick="clearLog()">🗑️ Limpiar Log</button>
+    </div>
+
+    <script>
+        let testResults = {};
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logElement = document.getElementById('test-log');
+            const logEntry = `[${timestamp}] ${message}\n`;
+            logElement.textContent += logEntry;
+            logElement.scrollTop = logElement.scrollHeight;
+
+            console.log(message);
+        }
+
+        function updateStatus(elementId, message, type) {
+            const element = document.getElementById(elementId);
+            element.className = `status ${type}`;
+            element.textContent = message;
+        }
+
+        function checkComponents() {
+            log('🔍 Verificando componentes críticos...');
+
+            // Verificar si el script de supresión está cargado
+            const suppressorLoaded = typeof window.__wompiInitialized !== 'undefined';
+            updateStatus('suppressor-status',
+                suppressorLoaded ? '✅ Error Suppressor cargado' : '❌ Error Suppressor no encontrado',
+                suppressorLoaded ? 'success' : 'error'
+            );
+
+            // Verificar si el script de Wompi está cargado
+            const wompiScript = document.querySelector('script[src*="wompi"]');
+            updateStatus('components-status',
+                wompiScript ? '✅ Script Wompi encontrado' : '❌ Script Wompi no encontrado',
+                wompiScript ? 'success' : 'warning'
+            );
+
+            // Verificar si WidgetCheckout está disponible
+            const widgetAvailable = window.WidgetCheckout && typeof window.WidgetCheckout === 'function';
+            updateStatus('widget-status',
+                widgetAvailable ? '✅ WidgetCheckout disponible' : '❌ WidgetCheckout no disponible',
+                widgetAvailable ? 'success' : 'error'
+            );
+
+            // Verificar configuración
+            const configLoaded = typeof window.WOMPI_CONFIG !== 'undefined';
+            if (configLoaded) {
+                log('📋 Configuración Wompi:');
+                log(`  - Sandbox: ${window.WOMPI_CONFIG.SANDBOX_MODE}`);
+                log(`  - Public Key: ${window.WOMPI_CONFIG.getPublicKey ? window.WOMPI_CONFIG.getPublicKey() : 'No disponible'}`);
+                log(`  - Currency: ${window.WOMPI_CONFIG.CURRENCY}`);
+            } else {
+                log('❌ Configuración Wompi no encontrada');
+            }
+
+            testResults.components = {
+                suppressor: suppressorLoaded,
+                script: !!wompiScript,
+                widget: widgetAvailable,
+                config: configLoaded
+            };
+        }
+
+        async function testCheckout() {
+            log('🧪 Iniciando prueba de checkout...');
+            updateStatus('checkout-result', '⏳ Ejecutando prueba...', 'info');
+
+            try {
+                // Verificar si hay carrito
+                if (!window.cartManager) {
+                    log('❌ Cart Manager no encontrado');
+                    updateStatus('checkout-result', '❌ Cart Manager no disponible', 'error');
+                    return;
+                }
+
+                // Agregar item de prueba al carrito
+                const testItem = {
+                    id: 'test-item-1',
+                    name: 'Producto de Prueba Wompi',
+                    price: 10000, // $100.00 para cumplir mínimo
+                    quantity: 1
+                };
+
+                window.cartManager.cart = [testItem];
+                window.cartManager.updateCartUI();
+
+                // Inicializar Wompi si no está
+                if (!window.wompiIntegration) {
+                    log('🔄 Inicializando Wompi Integration...');
+
+                    // Cargar configuración
+                    const { default: WOMPI_CONFIG } = await import('./assets/js/config/wompi-config.js');
+                    const { initializeWompi } = await import('./assets/js/modules/wompi-integration.js');
+
+                    window.wompiIntegration = initializeWompi(WOMPI_CONFIG.getWompiConfig());
+
+                    // Esperar inicialización
+                    const initialized = await window.wompiIntegration.initialize();
+                    if (!initialized) {
+                        throw new Error('No se pudo inicializar Wompi');
+                    }
+
+                    log('✅ Wompi Integration inicializada correctamente');
+                }
+
+                // Verificar WidgetCheckout después de inicialización
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
+                if (!window.WidgetCheckout || typeof window.WidgetCheckout !== 'function') {
+                    throw new Error('WidgetCheckout no disponible después de inicialización');
+                }
+
+                // Simular datos de orden
+                const orderData = {
+                    total: 10000,
+                    subtotal: 8403.36,
+                    tax: 1596.64,
+                    items: window.cartManager.cart,
+                    itemCount: 1,
+                    customerEmail: 'test@example.com',
+                    customerName: 'Usuario de Prueba',
+                    customerPhone: '3001234567',
+                    customerDocument: '1234567890'
+                };
+
+                log('📦 Datos de orden preparados:');
+                log(`  - Total: $${orderData.total.toFixed(2)}`);
+                log(`  - Items: ${orderData.items.length}`);
+                log(`  - Customer: ${orderData.customerEmail}`);
+
+                // Probar opening checkout
+                const reference = await window.wompiIntegration.openCheckout(orderData);
+
+                log('✅ Checkout abierto exitosamente:');
+                log(`  - Referencia: ${reference}`);
+                log(`  - WidgetCheckout disponible: ${typeof window.WidgetCheckout}`);
+
+                updateStatus('checkout-result', '✅ Prueba completada exitosamente', 'success');
+                testResults.checkout = {
+                    success: true,
+                    reference: reference,
+                    widgetAvailable: !!window.WidgetCheckout
+                };
+
+            } catch (error) {
+                log('❌ Error en prueba de checkout:');
+                log(`  - Error: ${error.message}`);
+                log(`  - WidgetCheckout disponible: ${typeof window.WidgetCheckout}`);
+
+                updateStatus('checkout-result', `❌ Error: ${error.message}`, 'error');
+                testResults.checkout = {
+                    success: false,
+                    error: error.message,
+                    widgetAvailable: !!window.WidgetCheckout
+                };
+            }
+        }
+
+        function clearLog() {
+            document.getElementById('test-log').textContent = '';
+            testResults = {};
+            updateStatus('checkout-result', 'Listo para nueva prueba', 'info');
+        }
+
+        function runAllTests() {
+            log('🧪 Iniciando pruebas completas de Wompi Integration...');
+            checkComponents();
+
+            updateStatus('status-container',
+                'Pruebas completadas - Revisa los resultados arriba',
+                testResults.components?.widget && testResults.checkout?.success ? 'success' : 'warning'
+            );
+        }
+
+        // Iniciar pruebas automáticamente
+        setTimeout(() => {
+            log('🚀 Cargando测试环境...');
+
+            // Simular carga del DOM
+            if (!window.WOMPI_CONFIG) {
+                window.WOMPI_CONFIG = {
+                    SANDBOX_MODE: false,
+                    PUBLIC_KEY_TEST: 'pub_test_Q5yDA9xoKdePzhSGeVe9HAqZlX8xnTxh',
+                    PUBLIC_KEY_PROD: 'pub_prod_cI8IJi8zI5v8lkKFtEFztW5YfNzxf5TI',
+                    CURRENCY: 'COP',
+                    getPublicKey: function () { return this.PUBLIC_KEY_PROD; },
+                    getWompiConfig: function () { return { publicKey: this.getPublicKey(), currency: this.CURRENCY, sandbox: this.SANDBOX_MODE }; }
+                };
+            }
+
+            // Esperar un poco y ejecutar pruebas
+            setTimeout(runAllTests, 2000);
+        }, 500);
+    </script>
+</body>
+
+</html>

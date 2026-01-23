@@ -38,25 +38,27 @@ export class WompiIntegration {
         }
 
         try {
-            // Marcar como en proceso de inicialización
-            window.__wompiInitialized = true;
+            console.log('🔄 Initializing Wompi integration...');
 
-            // Verificar si WidgetCheckout ya está disponible (cargado desde HTML)
+            // Esperar a que el script esté disponible (ya se carga en index.html)
+            await this.waitForWidgetCheckout(10, 100);
+
+            // Verificar si WidgetCheckout está disponible
             if (window.WidgetCheckout && typeof window.WidgetCheckout === 'function') {
-                console.log('✅ Wompi Widget already loaded from HTML');
+                console.log('✅ Wompi Widget is available');
+
+                // Marcar como inicializado globalmente
+                window.__wompiInitialized = true;
                 this.isInitialized = true;
+
+                console.log('✅ Wompi integration initialized successfully');
                 return true;
+            } else {
+                console.error('❌ WidgetCheckout not available after loading');
+                return false;
             }
-
-            // Si no está disponible, intentar cargarlo dinámicamente
-            console.log('🔄 Loading Wompi Widget script dynamically...');
-            await this.loadWompiScript();
-
-            this.isInitialized = true;
-            console.log('✅ Wompi Widget script loaded successfully');
-            return true;
         } catch (error) {
-            console.error('❌ Error loading Wompi script:', error);
+            console.error('❌ Error initializing Wompi:', error);
             // Resetear el flag en caso de error
             window.__wompiInitialized = false;
             return false;

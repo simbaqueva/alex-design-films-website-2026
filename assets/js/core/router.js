@@ -275,8 +275,6 @@ export class Router {
         }
     }
 
-
-
     /**
      * Ejecutar scripts del componente
      */
@@ -367,8 +365,6 @@ export class Router {
             }, index * 100);
         });
     }
-
-
 
     /**
      * Inicializar AI agents section
@@ -479,6 +475,8 @@ export class Router {
             // Mostrar loading
             this.showCheckoutLoading(true);
 
+            console.log('🔄 Starting checkout process...');
+
             // Inicializar Wompi si no está inicializado
             if (!window.wompiIntegration) {
                 console.log('🔄 Initializing Wompi integration...');
@@ -486,18 +484,15 @@ export class Router {
                     // Cargar configuración
                     const { default: WOMPI_CONFIG } = await import('../config/wompi-config.js');
                     const { initializeWompi } = await import('../modules/wompi-integration.js');
-                    const { initializeWompiErrorHandler } = await import('../modules/wompi-error-handler.js');
-
-                    // Inicializar manejador de errores primero
-                    initializeWompiErrorHandler();
 
                     // Inicializar con la configuración
                     window.wompiIntegration = initializeWompi(WOMPI_CONFIG.getWompiConfig());
 
-                    // Esperar un momento a que la inicialización se complete
-                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    // Esperar a que el script esté completamente cargado
+                    console.log('⏳ Waiting for Wompi script to load...');
+                    await this.waitForWompiScript(5000); // 5 segundos máximo
 
-                    // Forzar inicialización explícita
+                    // Inicializar la integración
                     const initialized = await window.wompiIntegration.initialize();
                     if (!initialized) {
                         throw new Error('No se pudo inicializar Wompi después del intento');
@@ -509,22 +504,13 @@ export class Router {
                 }
             }
 
-            // Verificar que WidgetCheckout esté disponible
+            // Verificación final de WidgetCheckout
             if (!window.WidgetCheckout || typeof window.WidgetCheckout !== 'function') {
-                console.error('❌ WidgetCheckout not available, attempting to reload...');
-                // Intentar recargar el script
-                try {
-                    await window.wompiIntegration.loadWompiScript();
-                    await window.wompiIntegration.waitForWidgetCheckoutExternal(30, 200); // Más tiempo y más retries
-                } catch (reloadError) {
-                    throw new Error('El widget de pago no está disponible. Por favor recarga la página.');
-                }
+                console.error('❌ WidgetCheckout not available after all attempts');
+                throw new Error('El widget de pago no está disponible. Por favor recarga la página.');
             }
 
-            // Verificación final
-            if (!window.WidgetCheckout || typeof window.WidgetCheckout !== 'function') {
-                throw new Error('WidgetCheckout no está disponible después de reintentar. Recarga la página.');
-            }
+            console.log('✅ WidgetCheckout is available, proceeding with checkout...');
 
             // Obtener datos del carrito
             const summary = window.cartManager.getCartSummary();
@@ -570,10 +556,50 @@ export class Router {
                 errorMessage = 'Error de conexión. Verifica tu internet e intenta nuevamente.';
             }
 
-            alert(errorMessage);
+            this.showCheckoutError(errorMessage);
         } finally {
             // Ocultar loading
             this.showCheckoutLoading(false);
+        }
+    }
+
+    /**
+     * Esperar a que el script de Wompi esté cargado
+     */
+    async waitForWompiScript(timeout = 5000) {
+        return new Promise((resolve, reject) => {
+            const startTime = Date.now();
+
+            const checkScript = () => {
+                if (window.WidgetCheckout && typeof window.WidgetCheckout === 'function') {
+                    console.log('✅ Wompi script loaded and WidgetCheckout available');
+                    resolve();
+                    return;
+                }
+
+                const elapsed = Date.now() - startTime;
+                if (elapsed > timeout) {
+                    console.error('❌ Timeout waiting for Wompi script');
+                    reject(new Error('Timeout loading Wompi script'));
+                    return;
+                }
+
+                setTimeout(checkScript, 100);
+            };
+
+            checkScript();
+        });
+    }
+
+    /**
+     * Mostrar error de checkout
+     */
+    showCheckoutError(message) {
+        // Intentar mostrar con el sistema de notificaciones
+        if (window.notificationManager) {
+            window.notificationManager.error(message);
+        } else {
+            alert(message);
         }
     }
 
@@ -678,7 +704,7 @@ export class Router {
                         </div>
                     </div>
                     <div class="cart-page-item__info">
-                        <h3 class="cart-page-item__name">${item.name.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</h3>
+                        <h3 class="cart-page-item__name">${item.name.replace(/</g, '<').replace(/>/g, '>')}</h3>
                         <p class="cart-page-item__price">$${item.price.toFixed(2)}</p>
                     </div>
                     <div class="cart-page-item__quantity">
@@ -797,8 +823,6 @@ export class Router {
         }
     }
 
-
-
     /**
      * Manejar envío del formulario de pago
      */
@@ -892,78 +916,6 @@ export class Router {
     }
 
     /**
-     * Reinicializar observadores
-     */
-    reinitializeObservers() {
-        // Disparar evento para que la app principal reinicialice observadores
-        document.dispatchEvent(new CustomEvent('route:changed', {
-            detail: { path: this.currentRoute }
-        }));
-    }
-
-    /**
-     * Animar entrada del componente
-     */
-    animateComponentEntry() {
-        const container = this.container;
-
-        // Animación más rápida y suave
-        container.style.opacity = '0';
-        container.style.transform = 'translateY(10px)';
-
-        requestAnimationFrame(() => {
-            container.style.transition = 'opacity 0.15s ease-out, transform 0.15s ease-out';
-            container.style.opacity = '1';
-            container.style.transform = 'translateY(0)';
-        });
-    }
-
-    /**
-     * Actualizar metadatos
-     */
-    updateMetadata(route) {
-        document.title = route.title;
-
-        // Actualizar meta description
-        let metaDescription = document.querySelector('meta[name="description"]');
-        if (metaDescription) {
-            metaDescription.content = route.description;
-        }
-
-        // Actualizar Open Graph
-        let ogTitle = document.querySelector('meta[property="og:title"]');
-        if (ogTitle) {
-            ogTitle.content = route.title;
-        }
-
-        let ogDescription = document.querySelector('meta[property="og:description"]');
-        if (ogDescription) {
-            ogDescription.content = route.description;
-        }
-    }
-
-    /**
-     * Actualizar navegación activa
-     */
-    updateActiveNavigation(path) {
-        // Limpiar estados activos
-        document.querySelectorAll('.nav__link').forEach(link => {
-            link.classList.remove('nav__link--active');
-        });
-
-        // Establecer estado activo - buscar por href con /
-        const activeLink = document.querySelector(`.nav__link[href="/${path}"]`);
-        if (activeLink) {
-            activeLink.classList.add('nav__link--active');
-        }
-
-        // Limpiar carrito si no estamos en tienda
-        if (this.currentRoute === 'tienda' && path !== 'tienda') {
-            this.unloadCartComponent();
-        }
-    }
-
-    /**
      * Cargar componente del carrito
      */
     async loadCartComponent() {
@@ -1036,6 +988,78 @@ export class Router {
             setTimeout(() => {
                 loadingScreen.style.display = 'none';
             }, 300);
+        }
+    }
+
+    /**
+     * Reinicializar observadores
+     */
+    reinitializeObservers() {
+        // Disparar evento para que la app principal reinicialice observadores
+        document.dispatchEvent(new CustomEvent('route:changed', {
+            detail: { path: this.currentRoute }
+        }));
+    }
+
+    /**
+     * Animar entrada del componente
+     */
+    animateComponentEntry() {
+        const container = this.container;
+
+        // Animación más rápida y suave
+        container.style.opacity = '0';
+        container.style.transform = 'translateY(10px)';
+
+        requestAnimationFrame(() => {
+            container.style.transition = 'opacity 0.15s ease-out, transform 0.15s ease-out';
+            container.style.opacity = '1';
+            container.style.transform = 'translateY(0)';
+        });
+    }
+
+    /**
+     * Actualizar metadatos
+     */
+    updateMetadata(route) {
+        document.title = route.title;
+
+        // Actualizar meta description
+        let metaDescription = document.querySelector('meta[name="description"]');
+        if (metaDescription) {
+            metaDescription.content = route.description;
+        }
+
+        // Actualizar Open Graph
+        let ogTitle = document.querySelector('meta[property="og:title"]');
+        if (ogTitle) {
+            ogTitle.content = route.title;
+        }
+
+        let ogDescription = document.querySelector('meta[property="og:description"]');
+        if (ogDescription) {
+            ogDescription.content = route.description;
+        }
+    }
+
+    /**
+     * Actualizar navegación activa
+     */
+    updateActiveNavigation(path) {
+        // Limpiar estados activos
+        document.querySelectorAll('.nav__link').forEach(link => {
+            link.classList.remove('nav__link--active');
+        });
+
+        // Establecer estado activo - buscar por href con /
+        const activeLink = document.querySelector(`.nav__link[href="/${path}"]`);
+        if (activeLink) {
+            activeLink.classList.add('nav__link--active');
+        }
+
+        // Limpiar carrito si no estamos en tienda
+        if (this.currentRoute === 'tienda' && path !== 'tienda') {
+            this.unloadCartComponent();
         }
     }
 
